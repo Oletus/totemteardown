@@ -23,7 +23,8 @@ var Game = function() {
         startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
             startBlockY += BLOCK_HEIGHT * 1.5;
-            this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: TotemBlock.randomType()}));
+            var type = TotemBlock.typeFromChar(STARTING_TYPES[i][j]);
+            this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
         }
         startPoleX += POLE_DISTANCE;
     }

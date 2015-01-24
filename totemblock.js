@@ -32,6 +32,24 @@ TotemBlock.Type = {
     STATIC: 5 // used for something like the totem head, that's not interactive
 };
 
+TotemBlock.typeFromChar = function(char) {
+    if (char == 'L') {
+        return TotemBlock.Type.SHOOTLEFT;
+    }
+    if (char == 'R') {
+        return TotemBlock.Type.SHOOTRIGHT;
+    }
+    if (char == 'B') {
+        return TotemBlock.Type.BLOCK;
+    }
+    if (char == 'E') {
+        return TotemBlock.Type.EMPTY;
+    }
+    if (char == 'J') {
+        return TotemBlock.Type.JUMP;
+    }
+};
+
 TotemBlock.SEED = 0;
 
 TotemBlock.randomType = function() {
