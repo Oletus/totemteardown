@@ -6,6 +6,8 @@ var game;
 
 var Game = function() {
     this.f = 0;
+    
+    this.bg = new Sprite('BackgroundSky.png');
 
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
@@ -278,8 +280,7 @@ Game.prototype.update = function() {
 
 Game.prototype.render = function() {
     var i;
-    ctx.fillStyle = '#aca';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.bg.fillCanvasFitBottom(ctx);
     
     var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
     ctx.fillStyle = '#f80';
