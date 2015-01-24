@@ -74,13 +74,13 @@ TotemBlock.prototype.update = function(supportedLevel) {
     } else if (this.state == TotemBlock.SWAPPING) {
         if (this.y < supportedLevel) {
             this.y += SWAP_SPEED;
-            if (this.y > supportedLevel) {
+            if (this.y >= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
         } else if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED;
-            if (this.y < supportedLevel) {
+            if (this.y <= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
@@ -155,7 +155,7 @@ TotemBlock.prototype.render = function(color) {
         ctx.lineTo(this.x + 10, this.y + 15);
     }
     ctx.fill();
-    //ctx.fillText(this.type, this.x, this.y);
+    //ctx.fillText(this.state, this.x - 15, this.y - 12);
 };
 
 /**
