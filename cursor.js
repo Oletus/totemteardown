@@ -1,10 +1,10 @@
-var TotemBlock = function(options) {
+var Cursor = function(options) {
     var defaults = {
         x: 0,
         y: 0,
-        width: 50,
-        height: 50,
-        value: 0
+        width: 55,
+        height: 55,
+        index: 0
     };
 
     for(var key in defaults) {
@@ -15,4 +15,3 @@ var TotemBlock = function(options) {
         }
     }
 };
-

@@ -1,10 +1,9 @@
-var TotemBlock = function(options) {
+var TotemPole = function(options) {
     var defaults = {
         x: 0,
         y: 0,
-        width: 50,
-        height: 50,
-        value: 0
+        blocks: [],
+        color: 'black'
     };
 
     for(var key in defaults) {
@@ -15,4 +14,3 @@ var TotemBlock = function(options) {
         }
     }
 };
-
