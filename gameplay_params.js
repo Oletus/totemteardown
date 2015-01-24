@@ -38,3 +38,5 @@ FIRST_BLOCK_APPEAR = 20; // seconds
 BLOCK_APPEAR_INTERVAL = 15; // seconds
 BLOCK_APPEAR_INTERVAL_REDUCE = 1; // seconds, each block appearing reduces the interval with this value
 BLOCK_APPEAR_INTERVAL_MIN = 5; // seconds
+
+START_COUNTDOWN_DURATION = 3; // seconds
