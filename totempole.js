@@ -14,3 +14,18 @@ var TotemPole = function(options) {
         }
     }
 };
+
+var BLOCK_HEIGHT = 50;
+
+TotemPole.prototype.update = function() {
+    // Iterate blocks from bottom to top
+    var supportedLevel = this.y - BLOCK_HEIGHT * 0.5;
+    for (var i = this.blocks.length - 1; i >= 0; --i) {
+        this.blocks[i].update(supportedLevel);
+        if (this.blocks[i].state != TotemBlock.SWAPPING) {
+            supportedLevel = this.blocks[i].y - BLOCK_HEIGHT;
+        } else {
+            supportedLevel -= BLOCK_HEIGHT;
+        }
+    }
+};

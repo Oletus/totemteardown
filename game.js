@@ -11,11 +11,11 @@ var Game = function() {
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
     var startPoleX = 0,
-        startPoleY = 10,
+        startPoleY = 500,
         startBlockX = 10,
         startBlockY = 10;
 
-    this.cursor = new Cursor({x: 98, y: 58});
+    this.cursors = [];
 
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX += 100, y: startPoleY}));
@@ -35,65 +35,97 @@ var Game = function() {
     this.gamepads.addButtonDownListener(2, this.removeBlock);
 };
 
+Game.prototype.cursorActive = function(playerNumber) {
+    while (this.cursors.length <= playerNumber) {
+        this.cursors.push(new Cursor({x: 0, y: 0}));
+    }
+    return this.cursors[playerNumber];
+};
+
+Game.prototype.clampCursor = function(cursor) {
+    if (cursor.block >= this.totemPoles[cursor.pole].blocks.length) {
+        cursor.block = this.totemPoles[cursor.pole].blocks.length - 1;
+    }
+    if (cursor.block < 0) {
+        cursor.block = 0;
+    }
+};
+
+Game.prototype.swap = function(pole, blockA, blockB) {
+    var poleObj = this.totemPoles[pole];
+    var a = poleObj.blocks[blockA];
+    var b = poleObj.blocks[blockB];
+    if (a.state == TotemBlock.SUPPORTED && b.state == TotemBlock.SUPPORTED) {
+        poleObj.blocks.splice(blockA, 1, b);
+        poleObj.blocks.splice(blockB, 1, a);
+        a.state = TotemBlock.SWAPPING;
+        b.state = TotemBlock.SWAPPING;
+    }
+};
+
 Game.prototype.moveCursorDown = function(playerNumber) {
-    if(!this.cursor.selected) {
-        this.cursor.y += 50;
-        this.cursor.index++;     
+    var cursor = this.cursorActive(playerNumber);
+    if(!cursor.selected) {
+        cursor.block++;
+        this.clampCursor(cursor);
     } else {
-        var prevIndex = this.cursor.index++;
-        var currentIndexValue = this.totemPoles[0].blocks[this.cursor.index].value;
-        var prevIndexValue = this.totemPoles[0].blocks[prevIndex].value;
-        this.totemPoles[0].blocks[this.cursor.index].value = prevIndexValue;
-        this.totemPoles[0].blocks[prevIndex].value = currentIndexValue;
-        this.cursor.selected = false;
-        this.cursor.index = currentIndexValue;
+        if (cursor.block < this.totemPoles[cursor.pole].blocks.length - 1) {
+            var topBlock = cursor.block;
+            var bottomBlock = cursor.block + 1;
+            this.swap(cursor.pole, topBlock, bottomBlock);
+            cursor.block++;
+        }
+        cursor.selected = false;
     }
 };
 
 Game.prototype.moveCursorUp = function(playerNumber) {
-    if(!this.cursor.selected) {
-        this.cursor.y -= 50;
-        this.cursor.index--;
+    var cursor = this.cursorActive(playerNumber);
+    if(!cursor.selected) {
+        cursor.block--;
+        this.clampCursor(cursor);
     } else {
-        var prevIndex = this.cursor.index--;
-        var currentIndexValue = this.totemPoles[0].blocks[this.cursor.index].value;
-        var prevIndexValue = this.totemPoles[0].blocks[prevIndex].value;
-        this.totemPoles[0].blocks[this.cursor.index].value = prevIndexValue;
-        this.totemPoles[0].blocks[prevIndex].value = currentIndexValue;
-        this.cursor.selected = false;
-        this.cursor.index = currentIndexValue;
+        if (cursor.block > 0) {
+            var topBlock = cursor.block - 1;
+            var bottomBlock = cursor.block;
+            this.swap(cursor.pole, topBlock, bottomBlock);
+            cursor.block--;
+        }
+        cursor.selected = false;
     }
 };
 
-Game.prototype.selectBlock = function() {
-    this.cursor.selected = true;
+Game.prototype.selectBlock = function(playerNumber) {
+    var cursor = this.cursorActive(playerNumber);
+    cursor.selected = true;
 };
 
-Game.prototype.deselectBlock = function() {
-    this.cursor.selected = false;
+Game.prototype.deselectBlock = function(playerNumber) {
+    var cursor = this.cursorActive(playerNumber);
+    cursor.selected = false;
 };
 
-Game.prototype.removeBlock = function() {
-    this.totemPoles[0].blocks.splice(this.cursor.index, 1);
-    
-    for(var i = 0; i < this.cursor.index; i++) {
-       this.totemPoles[0].blocks[i].y += 50; 
-    }
-
-    this.render();
+Game.prototype.removeBlock = function(playerNumber) {
+    var cursor = this.cursorActive(playerNumber);
+    this.totemPoles[cursor.pole].blocks.splice(cursor.block, 1);
+    this.clampCursor(cursor);
 };
 
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
+   var i;
    this.gamepads.update();
+   for(i = 0; i < this.totemPoles.length; i++) {
+       this.totemPoles[i].update();
+   }
 };
 
 Game.prototype.render = function() {
-
+    var i;
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    for(var i = 0; i < this.totemPoles.length; i++) {
+    for(i = 0; i < this.totemPoles.length; i++) {
         for(var j = 0; j < this.totemPoles[i].blocks.length; j++) {
             ctx.fillStyle = this.totemPoleColors[i];
             ctx.fillRect(this.totemPoles[i].blocks[j].x, this.totemPoles[i].blocks[j].y, this.totemPoles[i].blocks[j].width, this.totemPoles[i].blocks[j].height);
@@ -105,14 +137,19 @@ Game.prototype.render = function() {
         }
     }
 
-    if(this.cursor.selected) {
-        ctx.strokeStyle = '#FFFF00';
-    } else {
-        ctx.strokeStyle = '#00FF00';    
+    for (i = 0; i < this.cursors.length; ++i) {
+        var cursor = this.cursors[i];
+        if(cursor.selected) {
+            ctx.strokeStyle = '#FFFF00';
+        } else {
+            ctx.strokeStyle = '#00FF00';    
+        }
+        ctx.lineWidth = 5;
+        if (this.totemPoles[cursor.pole].blocks.length > cursor.block) {
+            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            ctx.strokeRect(block.x, block.y, cursor.width, cursor.height);
+        }
     }
-    
-    ctx.lineWidth = 5;
-    ctx.strokeRect(this.cursor.x, this.cursor.y, this.cursor.width, this.cursor.height);
 };
 
 var webFrame = function() {

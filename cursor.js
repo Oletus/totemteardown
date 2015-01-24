@@ -1,10 +1,10 @@
 var Cursor = function(options) {
     var defaults = {
-        x: 0,
-        y: 0,
-        width: 55,
-        height: 55,
-        index: 0
+        pole: 0,
+        block: 0,
+        width: 50,
+        height: 50,
+        selected: false
     };
 
     for(var key in defaults) {
