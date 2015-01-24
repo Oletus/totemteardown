@@ -19,6 +19,12 @@ var Game = function() {
 
     this.cursors = [];
 
+    this.backgroundMusic = new Audio('prey', true);
+    this.backgroundMusic.play();
+
+    this.explosionSound = new Audio('explosion', false);
+    this.bearRoar = new Audio('bear', false);
+
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: this.totemPoleColors[i]}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
@@ -176,7 +182,8 @@ Game.prototype.activeProjectiles = function(playerNumber) {
 Game.prototype.activateBlock = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     if (this.hasBlock(cursor.pole, cursor.block)) {
-        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber);
+
+        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber, this.eagleRoar);
         if (this.activeProjectiles(playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER) {
             this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
@@ -217,7 +224,13 @@ Game.prototype.update = function() {
                                 }
                             }
                         }
+
+                        if(blocked) {
+                            this.bearRoar.play();
+                        }
+
                         if (!blocked) {
+                            this.explosionSound.play();
                             this.totemPoles[j].blocks.splice(k, 1);
                             this.clampAllCursors();
                         }

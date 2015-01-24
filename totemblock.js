@@ -172,9 +172,17 @@ TotemBlock.prototype.activate = function(playerNumber) {
         }
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
+
+        this.eagleRoar = new Audio('eagle', false);
+        this.eagleRoar.play();
+
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
+
+        this.eagleRoar = new Audio('eagle', false);
+        this.eagleRoar.play();
+
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];
