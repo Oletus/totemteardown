@@ -295,7 +295,7 @@ var webFrame = function() {
 
 var initGame = function() {
     canvas = document.createElement('canvas');
-    canvas.width = 900;
+    canvas.width = SCREEN_WIDTH;
     canvas.height = 700;
     document.body.appendChild(canvas);
     ctx = canvas.getContext('2d');
