@@ -14,7 +14,7 @@ var Game = function() {
     this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
 
-    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
+    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
         startPoleY = 650,
         startBlockY = 10;
 
@@ -33,11 +33,11 @@ var Game = function() {
 
     this.gamepads = new Gamepads(this);
 
-    this.gamepads.addButtonDownListener(13, this.moveCursorDown);
-    this.gamepads.addButtonDownListener(12, this.moveCursorUp);
-    this.gamepads.addButtonDownListener(0, this.selectBlock);
-    this.gamepads.addButtonDownListener(1, this.deselectBlock);
-    this.gamepads.addButtonDownListener(2, this.activateBlock);
+    this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
+    this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
+    this.gamepads.addButtonChangeListener(0, this.selectBlock);
+    this.gamepads.addButtonChangeListener(1, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(2, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
 };
 
