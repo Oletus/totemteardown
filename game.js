@@ -12,5 +12,8 @@ var initGame = function() {
     document.body.appendChild(canvas);
     ctx = canvas.getContext('2d');
 
+    var block = TotemBlock();
+    console.log(block);
+
     frame();
 };
