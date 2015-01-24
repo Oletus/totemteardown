@@ -34,6 +34,8 @@ APPEAR_TYPES = [
     'BSJ'
 ];
 
+AVOID_CREATING_OVERREPRESENTED_BLOCKS = true;
+
 FIRST_BLOCK_APPEAR = 20; // seconds
 BLOCK_APPEAR_INTERVAL = 15; // seconds
 BLOCK_APPEAR_INTERVAL_REDUCE = 1; // seconds, each block appearing reduces the interval with this value

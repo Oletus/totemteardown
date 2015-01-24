@@ -33,3 +33,13 @@ TotemPole.prototype.render = function() {
         this.blocks[j].render(this.color);
     }
 };
+
+TotemPole.prototype.blockCount = function(type) {
+    var total = 0;
+    for(var j = 0; j < this.blocks.length; j++) {
+        if (this.blocks[j].type === type) {
+            ++total;
+        }
+    }
+    return total;
+};
