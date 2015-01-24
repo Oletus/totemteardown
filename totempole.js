@@ -30,12 +30,6 @@ TotemPole.prototype.update = function() {
 
 TotemPole.prototype.render = function() {
     for(var j = 0; j < this.blocks.length; j++) {
-        ctx.fillStyle = this.color;
-        canvasUtil.fillCenteredRect(ctx, this.blocks[j].x, this.blocks[j].y, this.blocks[j].width, this.blocks[j].height);
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 5;
-        canvasUtil.strokeCenteredRect(ctx, this.blocks[j].x, this.blocks[j].y, this.blocks[j].width, this.blocks[j].height);
-        ctx.fillStyle = 'black';
-        ctx.fillText(this.blocks[j].type, this.blocks[j].x, this.blocks[j].y);
+        this.blocks[j].render(this.color);
     }
 };
