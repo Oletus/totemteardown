@@ -33,6 +33,14 @@ TotemBlock.Type = {
     STATIC: 5 // used for something like the totem head, that's not interactive
 };
 
+TotemBlock.sprites = [
+    new Sprite('block-shoot_left.png'),
+    new Sprite('block-shoot_right.png'),
+    new Sprite('block-shield.png'),
+    new Sprite('block-jump.png'),
+    new Sprite('block-empty.png')
+]
+
 TotemBlock.typeFromChar = function(char) {
     if (char == 'L') {
         return TotemBlock.Type.SHOOTLEFT;
@@ -111,7 +119,9 @@ TotemBlock.prototype.update = function(supportedLevel) {
 };
 
 TotemBlock.prototype.render = function(color) {
-    ctx.fillStyle = color;
+    TotemBlock.sprites[this.type].drawRotated(ctx, this.x, this.y, 0);
+    // Commented: debug draw mode
+    /*ctx.fillStyle = color;
     canvasUtil.fillCenteredRect(ctx, this.x, this.y, this.width, this.height);
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 3;
@@ -154,7 +164,7 @@ TotemBlock.prototype.render = function(color) {
         ctx.lineTo(this.x - 10, this.y + 15);
         ctx.lineTo(this.x + 10, this.y + 15);
     }
-    ctx.fill();
+    ctx.fill();*/
     //ctx.fillText(this.state, this.x - 15, this.y - 12);
 };
 
