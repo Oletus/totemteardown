@@ -6,6 +6,7 @@ var game;
 
 var Game = function() {
     this.f = 0;
+    this.block = new TotemBlock({});
 };
 
 // This runs at fixed 60 FPS
@@ -14,13 +15,16 @@ Game.prototype.update = function() {
     if (this.f > 100) {
         this.f = 0;
     }
+
+    this.block.y += 10;
 };
 
 Game.prototype.render = function() {
+
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, this.f, this.f);
+    ctx.fillRect(0, this.block.y, this.block.width, this.block.height);
 };
 
 var webFrame = function() {
