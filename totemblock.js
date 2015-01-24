@@ -103,10 +103,12 @@ TotemBlock.prototype.render = function(color) {
     }
     if (this.type === TotemBlock.Type.BLOCK) {
         ctx.save();
-        if (this.facingLeft) {
-            ctx.translate(-10, 0);
-        } else {
-            ctx.translate(10, 0);
+        if (!BLOCK_BOTH_DIRECTIONS) {
+            if (this.facingLeft) {
+                ctx.translate(-10, 0);
+            } else {
+                ctx.translate(10, 0);
+            }
         }
         ctx.moveTo(this.x + 10, this.y - 10);
         ctx.lineTo(this.x + 10, this.y + 10);

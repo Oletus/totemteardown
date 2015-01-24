@@ -163,11 +163,15 @@ Game.prototype.update = function() {
                 if (!hitBox.isEmpty()) {
                     var blocked = false;
                     if (block.type === TotemBlock.Type.BLOCK) {
-                        if (obj.velX < 0 && !block.facingLeft) {
+                        if (BLOCK_BOTH_DIRECTIONS) {
                             blocked = true;
-                        }
-                        if (obj.velX > 0 && block.facingLeft) {
-                            blocked = true;
+                        } else {
+                            if (obj.velX < 0 && !block.facingLeft) {
+                                blocked = true;
+                            }
+                            if (obj.velX > 0 && block.facingLeft) {
+                                blocked = true;
+                            }
                         }
                     }
                     if (!blocked) {
