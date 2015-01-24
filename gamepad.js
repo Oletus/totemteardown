@@ -7,7 +7,7 @@ var Gamepads = function(callbackObj) {
 
 Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
     for (var i = 0; i < gamepads.length; ++i) {
-        if (gamepads[i].index === this.players[playerNumber]) {
+        if (gamepads[i] !== undefined && gamepads[i] !== null && gamepads[i].index === this.players[playerNumber]) {
             return gamepads[i];
         }
     }
@@ -23,7 +23,7 @@ Gamepads.prototype.update = function() {
     }
 
     for (var i = 0; i < gamepads.length; ++i) {
-        if (gamepads[i] !== undefined) {
+        if (gamepads[i] !== undefined && gamepads[i] !== null) {
             var key = 'index' + gamepads[i].index;
             if (!this.indexToPlayer.hasOwnProperty(key)) {
                 this.indexToPlayer[key] = this.players.length;

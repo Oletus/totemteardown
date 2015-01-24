@@ -37,7 +37,7 @@ var Game = function() {
 
 Game.prototype.cursorActive = function(playerNumber) {
     while (this.cursors.length <= playerNumber) {
-        this.cursors.push(new Cursor({x: 0, y: 0}));
+        this.cursors.push(new Cursor({block: 0, pole: playerNumber}));
     }
     return this.cursors[playerNumber];
 };
