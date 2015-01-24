@@ -35,8 +35,7 @@ var Game = function() {
 
     this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
     this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
-    this.gamepads.addButtonChangeListener(0, this.selectBlock);
-    this.gamepads.addButtonChangeListener(1, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(0, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(2, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
 };
