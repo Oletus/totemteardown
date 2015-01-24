@@ -123,11 +123,23 @@ Game.prototype.removeBlock = function(playerNumber) {
     this.clampCursor(cursor);
 };
 
+Game.prototype.activeProjectiles = function(playerNumber) {
+    var total = 0;
+    for (var i = 0; i < this.dynamicObjs.length; ++i) {
+        if (this.dynamicObjs[i].shooter == playerNumber) {
+            ++total;
+        }
+    }
+    return total;
+};
+
 Game.prototype.activateBlock = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     if (this.hasBlock(cursor.pole, cursor.block)) {
-        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate();
-        this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
+        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber);
+        if (this.activeProjectiles(playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER) {
+            this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
+        }
     }
 };
 

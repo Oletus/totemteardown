@@ -129,7 +129,7 @@ TotemBlock.prototype.render = function(color) {
 /**
  * @return {Array} array of created objects
  */
-TotemBlock.prototype.activate = function() {
+TotemBlock.prototype.activate = function(playerNumber) {
     if (this.type === TotemBlock.Type.BLOCK) {
         this.facingLeft = !this.facingLeft;
     }
@@ -140,10 +140,10 @@ TotemBlock.prototype.activate = function() {
         }
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
-        return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED})];
+        return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-        return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED})];
+        return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];
 };
