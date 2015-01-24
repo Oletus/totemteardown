@@ -22,6 +22,7 @@ var TotemBlock = function(options) {
 TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
 TotemBlock.FALLING = 2;
+TotemBlock.APPEARING = 3;
 
 TotemBlock.Type = {
     SHOOTLEFT: 0,
@@ -30,6 +31,27 @@ TotemBlock.Type = {
     JUMP: 3,
     EMPTY: 4,
     STATIC: 5 // used for something like the totem head, that's not interactive
+};
+
+TotemBlock.typeFromChar = function(char) {
+    if (char == 'L') {
+        return TotemBlock.Type.SHOOTLEFT;
+    }
+    if (char == 'R') {
+        return TotemBlock.Type.SHOOTRIGHT;
+    }
+    if (char == 'B') {
+        return TotemBlock.Type.BLOCK;
+    }
+    if (char == 'E') {
+        return TotemBlock.Type.EMPTY;
+    }
+    if (char == 'J') {
+        return TotemBlock.Type.JUMP;
+    }
+    if (char == 'S') {
+        return Math.random() > 0.5 ? TotemBlock.Type.SHOOTLEFT : TotemBlock.Type.SHOOTRIGHT;
+    }
 };
 
 TotemBlock.SEED = 0;
@@ -41,7 +63,15 @@ TotemBlock.randomType = function() {
 };
 
 TotemBlock.prototype.update = function(supportedLevel) {
-    if (this.state == TotemBlock.SWAPPING) {
+    if (this.state == TotemBlock.APPEARING) {
+        if (this.y > supportedLevel) {
+            this.y -= SWAP_SPEED * 0.5;
+            if (this.y <= supportedLevel) {
+                this.y = supportedLevel;
+                this.state = TotemBlock.SUPPORTED;
+            }
+        }
+    } else if (this.state == TotemBlock.SWAPPING) {
         if (this.y < supportedLevel) {
             this.y += SWAP_SPEED;
             if (this.y > supportedLevel) {
@@ -103,10 +133,12 @@ TotemBlock.prototype.render = function(color) {
     }
     if (this.type === TotemBlock.Type.BLOCK) {
         ctx.save();
-        if (this.facingLeft) {
-            ctx.translate(-10, 0);
-        } else {
-            ctx.translate(10, 0);
+        if (!BLOCK_BOTH_DIRECTIONS) {
+            if (this.facingLeft) {
+                ctx.translate(-10, 0);
+            } else {
+                ctx.translate(10, 0);
+            }
         }
         ctx.moveTo(this.x + 10, this.y - 10);
         ctx.lineTo(this.x + 10, this.y + 10);
@@ -129,7 +161,7 @@ TotemBlock.prototype.render = function(color) {
 /**
  * @return {Array} array of created objects
  */
-TotemBlock.prototype.activate = function() {
+TotemBlock.prototype.activate = function(playerNumber) {
     if (this.type === TotemBlock.Type.BLOCK) {
         this.facingLeft = !this.facingLeft;
     }
@@ -140,10 +172,10 @@ TotemBlock.prototype.activate = function() {
         }
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
-        return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED})];
+        return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-        return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED})];
+        return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];
 };
