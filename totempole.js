@@ -15,8 +15,6 @@ var TotemPole = function(options) {
     }
 };
 
-var BLOCK_HEIGHT = 50;
-
 TotemPole.prototype.update = function() {
     // Iterate blocks from bottom to top
     var supportedLevel = this.y - BLOCK_HEIGHT * 0.5;
@@ -27,5 +25,17 @@ TotemPole.prototype.update = function() {
         } else {
             supportedLevel -= BLOCK_HEIGHT;
         }
+    }
+};
+
+TotemPole.prototype.render = function() {
+    for(var j = 0; j < this.blocks.length; j++) {
+        ctx.fillStyle = this.color;
+        canvasUtil.fillCenteredRect(ctx, this.blocks[j].x, this.blocks[j].y, this.blocks[j].width, this.blocks[j].height);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 5;
+        canvasUtil.strokeCenteredRect(ctx, this.blocks[j].x, this.blocks[j].y, this.blocks[j].width, this.blocks[j].height);
+        ctx.fillStyle = 'black';
+        ctx.fillText(this.blocks[j].type, this.blocks[j].x, this.blocks[j].y);
     }
 };

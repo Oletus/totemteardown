@@ -3,8 +3,8 @@ var TotemBlock = function(options) {
         x: 0,
         y: 0,
         width: 50,
-        height: 50,
-        value: 0,
+        height: BLOCK_HEIGHT,
+        type: 0,
         state: TotemBlock.SUPPORTED,
         velY: 0
     };
@@ -21,6 +21,19 @@ var TotemBlock = function(options) {
 TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
 TotemBlock.FALLING = 2;
+
+TotemBlock.Type = {
+    SHOOTLEFT: 0,
+    SHOOTRIGHT: 1,
+    BLOCK: 2,
+    JUMP: 3,
+    EMPTY: 4,
+    STATIC: 5 // used for something like the totem head, that's not interactive
+};
+
+TotemBlock.randomType = function() {
+    return Math.floor(Math.random() * (5 - 0.00001)); // types 0 to 4
+};
 
 TotemBlock.prototype.update = function(supportedLevel) {
     if (this.state == TotemBlock.SWAPPING) {

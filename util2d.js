@@ -1243,3 +1243,11 @@ canvasUtil.clipRect = function(ctx, rect) {
     ctx.rect(xywh.x, xywh.y, xywh.w, xywh.h);
     ctx.clip();
 };
+
+canvasUtil.fillCenteredRect = function(ctx, x, y, w, h) {
+    ctx.fillRect(x - w * 0.5, y - h * 0.5, w, h);
+};
+
+canvasUtil.strokeCenteredRect = function(ctx, x, y, w, h) {
+    ctx.strokeRect(x - w * 0.5, y - h * 0.5, w, h);
+};

@@ -10,21 +10,20 @@ var Game = function() {
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
-    var startPoleX = 0,
-        startPoleY = 500,
-        startBlockX = 10,
+    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
+        startPoleY = 550,
         startBlockY = 10;
 
     this.cursors = [];
 
     for(var i = 0; i < 4; i++) {
-        this.totemPoles.push(new TotemPole({x: startPoleX += 100, y: startPoleY}));
-
-        for (var j = 0; j < 10; j++) {
-            this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY += 50, value: j + 1}));
+        this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: this.totemPoleColors[i]}));
+        startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
+        for (var j = 0; j < STARTING_BLOCKS; j++) {
+            startBlockY += BLOCK_HEIGHT * 1.5;
+            this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: TotemBlock.randomType()}));
         }
-
-        startBlockY = 10;
+        startPoleX += POLE_DISTANCE;
     }
 
     this.gamepads = new Gamepads(this);
@@ -32,7 +31,7 @@ var Game = function() {
     this.gamepads.addButtonDownListener(12, this.moveCursorUp);
     this.gamepads.addButtonDownListener(0, this.selectBlock);
     this.gamepads.addButtonDownListener(1, this.deselectBlock);
-    this.gamepads.addButtonDownListener(2, this.removeBlock);
+    //this.gamepads.addButtonDownListener(2, this.removeBlock);
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
@@ -122,19 +121,11 @@ Game.prototype.update = function() {
 
 Game.prototype.render = function() {
     var i;
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = '#def';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    for(i = 0; i < this.totemPoles.length; i++) {
-        for(var j = 0; j < this.totemPoles[i].blocks.length; j++) {
-            ctx.fillStyle = this.totemPoleColors[i];
-            ctx.fillRect(this.totemPoles[i].blocks[j].x, this.totemPoles[i].blocks[j].y, this.totemPoles[i].blocks[j].width, this.totemPoles[i].blocks[j].height);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 5;
-            ctx.strokeRect(this.totemPoles[i].blocks[j].x, this.totemPoles[i].blocks[j].y, this.totemPoles[i].blocks[j].width, this.totemPoles[i].blocks[j].height);
-            ctx.fillStyle = 'black';
-            ctx.fillText(this.totemPoles[i].blocks[j].value, this.totemPoles[i].blocks[j].x + 22, this.totemPoles[i].blocks[j].y + 25);
-        }
+    for (i = 0; i < this.totemPoles.length; i++) {
+        this.totemPoles[i].render();
     }
 
     for (i = 0; i < this.cursors.length; ++i) {
@@ -147,7 +138,7 @@ Game.prototype.render = function() {
         ctx.lineWidth = 5;
         if (this.totemPoles[cursor.pole].blocks.length > cursor.block) {
             var block = this.totemPoles[cursor.pole].blocks[cursor.block];
-            ctx.strokeRect(block.x, block.y, cursor.width, cursor.height);
+            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
         }
     }
 };
