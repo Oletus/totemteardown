@@ -53,6 +53,12 @@ Game.prototype.clampCursor = function(cursor) {
     }
 };
 
+Game.prototype.clampAllCursors = function() {
+    for (var i = 0; i < this.cursors.length; ++i) {
+        this.clampCursor(this.cursors[i]);
+    }
+};
+
 Game.prototype.swap = function(pole, blockA, blockB) {
     var poleObj = this.totemPoles[pole];
     var a = poleObj.blocks[blockA];
@@ -132,11 +138,40 @@ Game.prototype.update = function() {
    for(i = 0; i < this.totemPoles.length; i++) {
        this.totemPoles[i].update();
    }
+   
+    for (i = 0; i < this.dynamicObjs.length; ++i) {
+        var obj = this.dynamicObjs[i]
+        obj.update();
+        var killBox = obj.killBox();
+        for (var j = 0; j < this.totemPoles.length; ++j) {
+            for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
+                var block = this.totemPoles[j].blocks[k];
+                var hitBox = block.hitBox();
+                hitBox.intersectRect(killBox);
+                if (!hitBox.isEmpty()) {
+                    var blocked = false;
+                    if (block.type === TotemBlock.Type.BLOCK) {
+                        if (obj.velX < 0 && !block.facingLeft) {
+                            blocked = true;
+                        }
+                        if (obj.velX > 0 && block.facingLeft) {
+                            blocked = true;
+                        }
+                    }
+                    if (!blocked) {
+                        this.totemPoles[j].blocks.splice(k, 1);
+                        this.clampAllCursors();
+                    }
+                    this.dynamicObjs.splice(i, 1);
+                }
+            }
+        }
+    }
 };
 
 Game.prototype.render = function() {
     var i;
-    ctx.fillStyle = '#def';
+    ctx.fillStyle = '#aca';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     for (i = 0; i < this.totemPoles.length; i++) {
@@ -155,6 +190,10 @@ Game.prototype.render = function() {
             var block = this.totemPoles[cursor.pole].blocks[cursor.block];
             canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
         }
+    }
+    
+    for (i = 0; i < this.dynamicObjs.length; ++i) {
+        this.dynamicObjs[i].render();
     }
 };
 
@@ -178,6 +217,7 @@ var webFrame = function() {
     }
     requestAnimationFrame(webFrame);
 };
+
 
 var initGame = function() {
     canvas = document.createElement('canvas');

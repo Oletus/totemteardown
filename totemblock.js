@@ -139,4 +139,15 @@ TotemBlock.prototype.activate = function() {
             this.velY -= JUMP_SPEED;
         }
     }
+    if (this.type === TotemBlock.Type.SHOOTLEFT) {
+        return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED})];
+    }
+    if (this.type === TotemBlock.Type.SHOOTRIGHT) {
+        return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED})];
+    }
+    return [];
+};
+
+TotemBlock.prototype.hitBox = function() {
+    return new Rect(this.x - this.width * 0.5, this.x + this.width * 0.5, this.y - this.height * 0.5, this.y + this.height * 0.5);
 };
