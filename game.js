@@ -232,6 +232,10 @@ Game.prototype.update = function() {
     if (BLOCK_APPEAR_INTERVAL > 0 && this.blockAppearTimer > BLOCK_APPEAR_INTERVAL) {
         this.blockAppearTimer = 0;
         this.spawnNewBlocks();
+        BLOCK_APPEAR_INTERVAL -= BLOCK_APPEAR_INTERVAL_REDUCE;
+        if (BLOCK_APPEAR_INTERVAL < BLOCK_APPEAR_INTERVAL_MIN) {
+            BLOCK_APPEAR_INTERVAL = BLOCK_APPEAR_INTERVAL_MIN;
+        }
     }
 };
 
