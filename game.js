@@ -9,6 +9,8 @@ var Game = function() {
 
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
+    
+    this.dynamicObjs = [];
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
         startPoleY = 550,
@@ -31,6 +33,7 @@ var Game = function() {
     this.gamepads.addButtonDownListener(12, this.moveCursorUp);
     this.gamepads.addButtonDownListener(0, this.selectBlock);
     this.gamepads.addButtonDownListener(1, this.deselectBlock);
+    this.gamepads.addButtonDownListener(2, this.activateBlock);
     //this.gamepads.addButtonDownListener(2, this.removeBlock);
 };
 
@@ -94,6 +97,10 @@ Game.prototype.moveCursorUp = function(playerNumber) {
     }
 };
 
+Game.prototype.hasBlock = function(pole, block) {
+    return this.totemPoles[pole].blocks.length > block;
+};
+
 Game.prototype.selectBlock = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     cursor.selected = true;
@@ -108,6 +115,14 @@ Game.prototype.removeBlock = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     this.totemPoles[cursor.pole].blocks.splice(cursor.block, 1);
     this.clampCursor(cursor);
+};
+
+Game.prototype.activateBlock = function(playerNumber) {
+    var cursor = this.cursorActive(playerNumber);
+    if (this.hasBlock(cursor.pole, cursor.block)) {
+        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate();
+        this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
+    }
 };
 
 // This runs at fixed 60 FPS
@@ -136,7 +151,7 @@ Game.prototype.render = function() {
             ctx.strokeStyle = '#00FF00';    
         }
         ctx.lineWidth = 5;
-        if (this.totemPoles[cursor.pole].blocks.length > cursor.block) {
+        if (this.hasBlock(cursor.pole, cursor.block)) {
             var block = this.totemPoles[cursor.pole].blocks[cursor.block];
             canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
         }

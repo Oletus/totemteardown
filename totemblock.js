@@ -71,7 +71,7 @@ TotemBlock.prototype.update = function(supportedLevel) {
         if (this.velY > FALL_SPEED) {
             this.velY = FALL_SPEED;
         }
-        if (this.y > supportedLevel - 0.5) {
+        if ((this.velY > 0 && this.y > supportedLevel - 0.5) || this.y > supportedLevel) {
             this.y = supportedLevel;
             this.state = TotemBlock.SUPPORTED;
             this.velY = 0;
@@ -124,4 +124,19 @@ TotemBlock.prototype.render = function(color) {
     }
     ctx.fill();
     //ctx.fillText(this.type, this.x, this.y);
+};
+
+/**
+ * @return {Array} array of created objects
+ */
+TotemBlock.prototype.activate = function() {
+    if (this.type === TotemBlock.Type.BLOCK) {
+        this.facingLeft = !this.facingLeft;
+    }
+    if (this.type === TotemBlock.Type.JUMP) {
+        if (this.state == TotemBlock.SUPPORTED) {
+            this.state = TotemBlock.FALLING;
+            this.velY -= JUMP_SPEED;
+        }
+    }
 };
