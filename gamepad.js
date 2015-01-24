@@ -15,7 +15,12 @@ Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
 };
 
 Gamepads.prototype.update = function() {
-    var gamepads = navigator.webkitGetGamepads();
+    var gamepads;
+    if (navigator.getGamepads) {
+        gamepads = navigator.getGamepads();
+    } else if (navigator.webkitGetGamepads) {
+        gamepads = navigator.webkitGetGamepads();
+    }
 
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined) {
@@ -31,12 +36,18 @@ Gamepads.prototype.update = function() {
             var l = this.downListeners[i];
             var pad = this.gamepadForPlayer(gamepads, p);
             if (pad != null) {
-                if (pad.buttons[l.buttonNumber] > 0.6) {
+                var value;
+                if (pad.buttons[l.buttonNumber].hasOwnProperty('value')) {
+                    value = pad.buttons[l.buttonNumber].value;
+                } else {
+                    value = pad.buttons[l.buttonNumber];
+                }
+                if (value > 0.6) {
                     if (!l.isDown[p]) {
                         l.isDown[p] = true;
                         l.callback.call(this.callbackObj, p);
                     }
-                } else if (pad.buttons[l.buttonNumber] < 0.1) {
+                } else if (value < 0.1) {
                     l.isDown[p] = false;
                 }
             }
