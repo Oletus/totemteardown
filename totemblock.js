@@ -22,6 +22,7 @@ var TotemBlock = function(options) {
 TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
 TotemBlock.FALLING = 2;
+TotemBlock.APPEARING = 3;
 
 TotemBlock.Type = {
     SHOOTLEFT: 0,
@@ -48,6 +49,9 @@ TotemBlock.typeFromChar = function(char) {
     if (char == 'J') {
         return TotemBlock.Type.JUMP;
     }
+    if (char == 'S') {
+        return Math.random() > 0.5 ? TotemBlock.Type.SHOOTLEFT : TotemBlock.Type.SHOOTRIGHT;
+    }
 };
 
 TotemBlock.SEED = 0;
@@ -59,7 +63,15 @@ TotemBlock.randomType = function() {
 };
 
 TotemBlock.prototype.update = function(supportedLevel) {
-    if (this.state == TotemBlock.SWAPPING) {
+    if (this.state == TotemBlock.APPEARING) {
+        if (this.y > supportedLevel) {
+            this.y -= SWAP_SPEED * 0.5;
+            if (this.y <= supportedLevel) {
+                this.y = supportedLevel;
+                this.state = TotemBlock.SUPPORTED;
+            }
+        }
+    } else if (this.state == TotemBlock.SWAPPING) {
         if (this.y < supportedLevel) {
             this.y += SWAP_SPEED;
             if (this.y > supportedLevel) {

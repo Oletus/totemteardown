@@ -45,16 +45,23 @@ Gamepads.prototype.update = function() {
                 if (value > 0.6) {
                     if (!l.isDown[p]) {
                         l.isDown[p] = true;
-                        l.callback.call(this.callbackObj, p);
+                        if (l.callback !== undefined) {
+                            l.callback.call(this.callbackObj, p);
+                        }
                     }
                 } else if (value < 0.1) {
-                    l.isDown[p] = false;
+                    if (l.isDown[p]) {
+                        l.isDown[p] = false;
+                        if (l.callbackUp !== undefined) {
+                            l.callbackUp.call(this.callbackObj, p);
+                        }
+                    }
                 }
             }
         }
     }
 };
 
-Gamepads.prototype.addButtonDownListener = function(buttonNumber, callback) {
-    this.downListeners.push({buttonNumber: buttonNumber, callback: callback, isDown: [false, false, false, false]});
+Gamepads.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
+    this.downListeners.push({buttonNumber: buttonNumber, callback: callbackDown, callbackUp: callbackUp, isDown: [false, false, false, false]});
 };

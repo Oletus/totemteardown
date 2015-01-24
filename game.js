@@ -11,9 +11,12 @@ var Game = function() {
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
     
     this.dynamicObjs = [];
+    
+    this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
+    this.appearPhase = 0;
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
-        startPoleY = 550,
+        startPoleY = 650,
         startBlockY = 10;
 
     this.cursors = [];
@@ -23,18 +26,17 @@ var Game = function() {
         startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
             startBlockY += BLOCK_HEIGHT * 1.5;
-            var type = TotemBlock.typeFromChar(STARTING_TYPES[i][j]);
+            var type = TotemBlock.typeFromChar(STARTING_TYPES[i % STARTING_TYPES.length][j]);
             this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
         }
         startPoleX += POLE_DISTANCE;
     }
 
     this.gamepads = new Gamepads(this);
-    this.gamepads.addButtonDownListener(13, this.moveCursorDown);
-    this.gamepads.addButtonDownListener(12, this.moveCursorUp);
-    this.gamepads.addButtonDownListener(0, this.selectBlock);
-    this.gamepads.addButtonDownListener(1, this.deselectBlock);
-    this.gamepads.addButtonDownListener(2, this.activateBlock);
+    this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
+    this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
+    this.gamepads.addButtonChangeListener(0, this.selectBlock, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(2, this.activateBlock);
     //this.gamepads.addButtonDownListener(2, this.removeBlock);
 };
 
@@ -60,6 +62,16 @@ Game.prototype.clampAllCursors = function() {
     }
 };
 
+Game.prototype.spawnNewBlocks = function() {
+    for (var i = 0; i < this.totemPoles.length; ++i) {
+        var pole = this.totemPoles[i];
+        var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
+        var type = TotemBlock.typeFromChar(types[this.appearPhase % types.length]);
+        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+    }
+    ++this.appearPhase;
+};
+
 Game.prototype.swap = function(pole, blockA, blockB) {
     var poleObj = this.totemPoles[pole];
     var a = poleObj.blocks[blockA];
@@ -69,7 +81,9 @@ Game.prototype.swap = function(pole, blockA, blockB) {
         poleObj.blocks.splice(blockB, 1, a);
         a.state = TotemBlock.SWAPPING;
         b.state = TotemBlock.SWAPPING;
+        return true;
     }
+    return false;
 };
 
 Game.prototype.moveCursorDown = function(playerNumber) {
@@ -81,10 +95,13 @@ Game.prototype.moveCursorDown = function(playerNumber) {
         if (cursor.block < this.totemPoles[cursor.pole].blocks.length - 1) {
             var topBlock = cursor.block;
             var bottomBlock = cursor.block + 1;
-            this.swap(cursor.pole, topBlock, bottomBlock);
-            cursor.block++;
+            if (this.swap(cursor.pole, topBlock, bottomBlock)) {
+                cursor.block++;
+            }
         }
-        cursor.selected = false;
+        if (!HOLD_TO_SWAP) {
+            cursor.selected = false;
+        }
     }
 };
 
@@ -97,10 +114,13 @@ Game.prototype.moveCursorUp = function(playerNumber) {
         if (cursor.block > 0) {
             var topBlock = cursor.block - 1;
             var bottomBlock = cursor.block;
-            this.swap(cursor.pole, topBlock, bottomBlock);
-            cursor.block--;
+            if (this.swap(cursor.pole, topBlock, bottomBlock)) {
+                cursor.block--;
+            }
         }
-        cursor.selected = false;
+        if (!HOLD_TO_SWAP) {
+            cursor.selected = false;
+        }
     }
 };
 
@@ -115,7 +135,9 @@ Game.prototype.selectBlock = function(playerNumber) {
 
 Game.prototype.deselectBlock = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
-    cursor.selected = false;
+    if (HOLD_TO_SWAP) {
+        cursor.selected = false;
+    }
 };
 
 Game.prototype.removeBlock = function(playerNumber) {
@@ -184,6 +206,12 @@ Game.prototype.update = function() {
             }
         }
     }
+    
+    this.blockAppearTimer += 1/FPS;
+    if (BLOCK_APPEAR_INTERVAL > 0 && this.blockAppearTimer > BLOCK_APPEAR_INTERVAL) {
+        this.blockAppearTimer = 0;
+        this.spawnNewBlocks();
+    }
 };
 
 Game.prototype.render = function() {
@@ -238,8 +266,8 @@ var webFrame = function() {
 
 var initGame = function() {
     canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
+    canvas.width = 900;
+    canvas.height = 700;
     document.body.appendChild(canvas);
     ctx = canvas.getContext('2d');
 
