@@ -114,7 +114,7 @@ TotemBlock.prototype.render = function(color) {
     ctx.fillStyle = color;
     canvasUtil.fillCenteredRect(ctx, this.x, this.y, this.width, this.height);
     ctx.strokeStyle = 'black';
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 3;
     canvasUtil.strokeCenteredRect(ctx, this.x, this.y, this.width, this.height);
     ctx.fillStyle = 'black';
     
