@@ -6,10 +6,15 @@ var game;
 
 var Game = function() {
     this.f = 0;
+    
+    this.bg = new Sprite('BackgroundSky.png');
 
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
     this.dynamicObjs = [];
+    
+    this.stateTime = 0;
+    this.state = Game.START_COUNTDOWN;
     
     this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
@@ -46,6 +51,9 @@ var Game = function() {
     this.gamepads.addButtonChangeListener(2, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
 };
+
+Game.START_COUNTDOWN = 0;
+Game.PLAYING = 1;
 
 Game.prototype.debugMode = function(e) {
 
@@ -86,12 +94,30 @@ Game.prototype.clampAllCursors = function() {
     }
 };
 
+Game.prototype.getBlockTypeForPole = function(pole, types) {
+    var tryIndex = this.appearPhase;
+    var decided = false;
+    while (!decided) {    
+        var type = TotemBlock.typeFromChar(types[tryIndex % types.length]);
+        decided = true;
+        if (AVOID_CREATING_OVERREPRESENTED_BLOCKS) {
+            if (pole.blockCount(type) >= pole.blocks.length * 0.49) {
+                decided = false;
+            }
+        }
+        ++tryIndex;
+    }
+    return type;
+};
+
 Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
-        var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
-        var type = TotemBlock.typeFromChar(types[this.appearPhase % types.length]);
-        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        if (pole.blocks.length <= VICTORY_BLOCKS) {
+            var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
+            var type = this.getBlockTypeForPole(pole, types);
+            pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        }
     }
 
 
@@ -104,6 +130,9 @@ Game.prototype.spawnNewBlocks = function() {
 };
 
 Game.prototype.swap = function(pole, blockA, blockB) {
+    if (this.state == Game.START_COUNTDOWN) {
+        return false;
+    }
     var poleObj = this.totemPoles[pole];
     var a = poleObj.blocks[blockA];
     var b = poleObj.blocks[blockB];
@@ -188,6 +217,9 @@ Game.prototype.activeProjectiles = function(playerNumber) {
 };
 
 Game.prototype.activateBlock = function(playerNumber) {
+    if (this.state == Game.START_COUNTDOWN) {
+        return;
+    }
     var cursor = this.cursorActive(playerNumber);
     if (this.hasBlock(cursor.pole, cursor.block)) {
 
@@ -200,8 +232,17 @@ Game.prototype.activateBlock = function(playerNumber) {
 
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
-   var i;
-   this.gamepads.update();
+    var i;
+    this.gamepads.update();
+   
+    this.stateTime += 1/FPS;
+    if (this.state === Game.START_COUNTDOWN) {
+        if (this.stateTime > START_COUNTDOWN_DURATION) {
+            this.state = Game.PLAYING;
+            this.stateTime = 0;
+        }
+    }
+   
    for(i = 0; i < this.totemPoles.length; i++) {
        this.totemPoles[i].update();
    }
@@ -220,7 +261,7 @@ Game.prototype.update = function() {
                     hitBox.intersectRect(killBox);
                     if (!hitBox.isEmpty()) {
                         var blocked = false;
-                        if (block.type === TotemBlock.Type.BLOCK) {
+                        if (block.type === TotemBlock.Type.SHIELD) {
                             if (BLOCK_BOTH_DIRECTIONS) {
                                 blocked = true;
                             } else {
@@ -262,8 +303,7 @@ Game.prototype.update = function() {
 
 Game.prototype.render = function() {
     var i;
-    ctx.fillStyle = '#aca';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.bg.fillCanvasFitBottom(ctx);
     
     var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
     ctx.fillStyle = '#f80';
@@ -290,6 +330,29 @@ Game.prototype.render = function() {
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         this.dynamicObjs[i].render();
     }
+
+    ctx.font = '100px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.save();
+    ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.2);
+    ctx.fillStyle = '#000';
+    if (this.state === Game.START_COUNTDOWN) {
+        var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
+        var currentNumberTime = mathUtil.fmod(numTime, 1.0);
+        var num = 3 - Math.floor(numTime);
+        var s = 1.6 - currentNumberTime * 0.6;
+        ctx.scale(s, s);
+        ctx.fillText(num, 0, 0);
+    } else if (this.state === Game.PLAYING) {
+        if (this.stateTime < 1) {
+            var s = this.stateTime + 1;
+            ctx.scale(s, s);
+            ctx.globalAlpha = 1 - this.stateTime;
+            ctx.fillText('PLAY!', 0, 0);
+        }
+    }
+    ctx.restore();
 };
 
 var webFrame = function() {

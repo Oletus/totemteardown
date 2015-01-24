@@ -31,11 +31,19 @@ TotemBlock.APPEARING = 3;
 TotemBlock.Type = {
     SHOOTLEFT: 0,
     SHOOTRIGHT: 1,
-    BLOCK: 2,
+    SHIELD: 2,
     JUMP: 3,
     EMPTY: 4,
     STATIC: 5 // used for something like the totem head, that's not interactive
 };
+
+TotemBlock.sprites = [
+    new Sprite('block-shoot_left.png'),
+    new Sprite('block-shoot_right.png'),
+    new Sprite('block-shield.png'),
+    new Sprite('block-jump.png'),
+    new Sprite('block-empty.png')
+]
 
 TotemBlock.typeFromChar = function(char) {
     if (char == 'L') {
@@ -45,7 +53,7 @@ TotemBlock.typeFromChar = function(char) {
         return TotemBlock.Type.SHOOTRIGHT;
     }
     if (char == 'B') {
-        return TotemBlock.Type.BLOCK;
+        return TotemBlock.Type.SHIELD;
     }
     if (char == 'E') {
         return TotemBlock.Type.EMPTY;
@@ -78,13 +86,13 @@ TotemBlock.prototype.update = function(supportedLevel) {
     } else if (this.state == TotemBlock.SWAPPING) {
         if (this.y < supportedLevel) {
             this.y += SWAP_SPEED;
-            if (this.y > supportedLevel) {
+            if (this.y >= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
         } else if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED;
-            if (this.y < supportedLevel) {
+            if (this.y <= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
@@ -117,10 +125,12 @@ TotemBlock.prototype.update = function(supportedLevel) {
 };
 
 TotemBlock.prototype.render = function(color) {
-    ctx.fillStyle = color;
+    TotemBlock.sprites[this.type].drawRotated(ctx, this.x, this.y, 0);
+    // Commented: debug draw mode
+    /*ctx.fillStyle = color;
     canvasUtil.fillCenteredRect(ctx, this.x, this.y, this.width, this.height);
     ctx.strokeStyle = 'black';
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 3;
     canvasUtil.strokeCenteredRect(ctx, this.x, this.y, this.width, this.height);
     ctx.fillStyle = 'black';
     
@@ -137,7 +147,7 @@ TotemBlock.prototype.render = function(color) {
         ctx.lineTo(this.x + 20, this.y);
         ctx.lineTo(this.x + 10, this.y - 10);
     }
-    if (this.type === TotemBlock.Type.BLOCK) {
+    if (this.type === TotemBlock.Type.SHIELD) {
         ctx.save();
         if (!BLOCK_BOTH_DIRECTIONS) {
             if (this.facingLeft) {
@@ -160,15 +170,15 @@ TotemBlock.prototype.render = function(color) {
         ctx.lineTo(this.x - 10, this.y + 15);
         ctx.lineTo(this.x + 10, this.y + 15);
     }
-    ctx.fill();
-    //ctx.fillText(this.type, this.x, this.y);
+    ctx.fill();*/
+    //ctx.fillText(this.state, this.x - 15, this.y - 12);
 };
 
 /**
  * @return {Array} array of created objects
  */
 TotemBlock.prototype.activate = function(playerNumber) {
-    if (this.type === TotemBlock.Type.BLOCK) {
+    if (this.type === TotemBlock.Type.SHIELD) {
         this.facingLeft = !this.facingLeft;
     }
     if (this.type === TotemBlock.Type.JUMP) {
