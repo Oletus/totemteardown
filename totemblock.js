@@ -27,7 +27,7 @@ TotemBlock.APPEARING = 3;
 TotemBlock.Type = {
     SHOOTLEFT: 0,
     SHOOTRIGHT: 1,
-    BLOCK: 2,
+    SHIELD: 2,
     JUMP: 3,
     EMPTY: 4,
     STATIC: 5 // used for something like the totem head, that's not interactive
@@ -41,7 +41,7 @@ TotemBlock.typeFromChar = function(char) {
         return TotemBlock.Type.SHOOTRIGHT;
     }
     if (char == 'B') {
-        return TotemBlock.Type.BLOCK;
+        return TotemBlock.Type.SHIELD;
     }
     if (char == 'E') {
         return TotemBlock.Type.EMPTY;
@@ -131,7 +131,7 @@ TotemBlock.prototype.render = function(color) {
         ctx.lineTo(this.x + 20, this.y);
         ctx.lineTo(this.x + 10, this.y - 10);
     }
-    if (this.type === TotemBlock.Type.BLOCK) {
+    if (this.type === TotemBlock.Type.SHIELD) {
         ctx.save();
         if (!BLOCK_BOTH_DIRECTIONS) {
             if (this.facingLeft) {
@@ -162,7 +162,7 @@ TotemBlock.prototype.render = function(color) {
  * @return {Array} array of created objects
  */
 TotemBlock.prototype.activate = function(playerNumber) {
-    if (this.type === TotemBlock.Type.BLOCK) {
+    if (this.type === TotemBlock.Type.SHIELD) {
         this.facingLeft = !this.facingLeft;
     }
     if (this.type === TotemBlock.Type.JUMP) {

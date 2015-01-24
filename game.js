@@ -246,7 +246,7 @@ Game.prototype.update = function() {
                     hitBox.intersectRect(killBox);
                     if (!hitBox.isEmpty()) {
                         var blocked = false;
-                        if (block.type === TotemBlock.Type.BLOCK) {
+                        if (block.type === TotemBlock.Type.SHIELD) {
                             if (BLOCK_BOTH_DIRECTIONS) {
                                 blocked = true;
                             } else {
