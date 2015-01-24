@@ -15,17 +15,17 @@ var Game = function() {
     this.appearPhase = 0;
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
-        startPoleY = 650,
-        startBlockY = 10;
+        startPoleY = GROUND_LEVEL;
 
     this.cursors = [];
 
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: this.totemPoleColors[i]}));
-        startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
+        var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
             startBlockY += BLOCK_HEIGHT * 1.5;
-            var type = TotemBlock.typeFromChar(STARTING_TYPES[i % STARTING_TYPES.length][j]);
+            var types = STARTING_TYPES[i % STARTING_TYPES.length];
+            var type = TotemBlock.typeFromChar(types[j % types.length]);
             this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
         }
         startPoleX += POLE_DISTANCE;
@@ -240,6 +240,10 @@ Game.prototype.render = function() {
     var i;
     ctx.fillStyle = '#aca';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
+    ctx.fillStyle = '#f80';
+    ctx.fillRect(0, victoryLineHeight, ctx.canvas.width, 2);
 
     for (i = 0; i < this.totemPoles.length; i++) {
         this.totemPoles[i].render();
