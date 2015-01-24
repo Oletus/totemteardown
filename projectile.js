@@ -3,7 +3,9 @@ var Projectile = function(options) {
         x: 0,
         y: 0,
         velX: 0,
-        shooter: 0
+        shooter: 0,
+        travelled: 0,
+        dead: false
     };
 
     for(var key in defaults) {
@@ -22,6 +24,10 @@ Projectile.prototype.update = function() {
     }
     if (this.x > ctx.canvas.width) {
         this.x = 0;
+    }
+    this.travelled += Math.abs(this.velX);
+    if (this.travelled > ctx.canvas.width * 1.5) {
+        this.dead = true;
     }
 };
 

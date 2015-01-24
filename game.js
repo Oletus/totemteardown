@@ -193,33 +193,37 @@ Game.prototype.update = function() {
    }
    
     for (i = 0; i < this.dynamicObjs.length; ++i) {
-        var obj = this.dynamicObjs[i]
+        var obj = this.dynamicObjs[i];
         obj.update();
-        var killBox = obj.killBox();
-        for (var j = 0; j < this.totemPoles.length; ++j) {
-            for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
-                var block = this.totemPoles[j].blocks[k];
-                var hitBox = block.hitBox();
-                hitBox.intersectRect(killBox);
-                if (!hitBox.isEmpty()) {
-                    var blocked = false;
-                    if (block.type === TotemBlock.Type.BLOCK) {
-                        if (BLOCK_BOTH_DIRECTIONS) {
-                            blocked = true;
-                        } else {
-                            if (obj.velX < 0 && !block.facingLeft) {
+        if (obj.dead) {
+            this.dynamicObjs.splice(i, 1);
+        } else {
+            var killBox = obj.killBox();
+            for (var j = 0; j < this.totemPoles.length; ++j) {
+                for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
+                    var block = this.totemPoles[j].blocks[k];
+                    var hitBox = block.hitBox();
+                    hitBox.intersectRect(killBox);
+                    if (!hitBox.isEmpty()) {
+                        var blocked = false;
+                        if (block.type === TotemBlock.Type.BLOCK) {
+                            if (BLOCK_BOTH_DIRECTIONS) {
                                 blocked = true;
-                            }
-                            if (obj.velX > 0 && block.facingLeft) {
-                                blocked = true;
+                            } else {
+                                if (obj.velX < 0 && !block.facingLeft) {
+                                    blocked = true;
+                                }
+                                if (obj.velX > 0 && block.facingLeft) {
+                                    blocked = true;
+                                }
                             }
                         }
+                        if (!blocked) {
+                            this.totemPoles[j].blocks.splice(k, 1);
+                            this.clampAllCursors();
+                        }
+                        this.dynamicObjs.splice(i, 1);
                     }
-                    if (!blocked) {
-                        this.totemPoles[j].blocks.splice(k, 1);
-                        this.clampAllCursors();
-                    }
-                    this.dynamicObjs.splice(i, 1);
                 }
             }
         }
