@@ -106,9 +106,11 @@ Game.prototype.getBlockTypeForPole = function(pole, types) {
 Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
-        var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
-        var type = this.getBlockTypeForPole(pole, types);
-        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        if (pole.blocks.length <= VICTORY_BLOCKS) {
+            var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
+            var type = this.getBlockTypeForPole(pole, types);
+            pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        }
     }
     ++this.appearPhase;
 };
