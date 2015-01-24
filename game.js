@@ -7,16 +7,27 @@ var game;
 var Game = function() {
     this.f = 0;
     this.block = new TotemBlock({});
+    
+    this.gamepads = new Gamepads(this);
+    this.gamepads.addButtonDownListener(0, this.gamepadPressed);
+};
+
+Game.prototype.gamepadPressed = function(playerNumber) {
+    if (playerNumber === 0) {
+        this.block.y -= 100;
+    } else {
+        this.block.y += 100;
+    }
 };
 
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
-    this.f += 0.5;
-    if (this.f > 100) {
-        this.f = 0;
-    }
+    this.gamepads.update();
 
-    this.block.y += 10;
+    this.block.y += 1;
+    if (this.block.y > 600) {
+        this.block.y = 0;
+    }
 };
 
 Game.prototype.render = function() {
