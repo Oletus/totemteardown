@@ -9,7 +9,6 @@ var Game = function() {
 
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
-    
     this.dynamicObjs = [];
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
@@ -34,7 +33,23 @@ var Game = function() {
     this.gamepads.addButtonDownListener(0, this.selectBlock);
     this.gamepads.addButtonDownListener(1, this.deselectBlock);
     this.gamepads.addButtonDownListener(2, this.activateBlock);
-    //this.gamepads.addButtonDownListener(2, this.removeBlock);
+    addEventListener("keydown", this.debugMode, false);
+};
+
+Game.prototype.debugMode = function(e) {
+
+
+    var debugPanel = document.getElementById("debug");
+
+    if(e.keyCode === 68) {
+        if(!DEBUG_MODE) {
+            DEBUG_MODE = true;
+            debugPanel.style.display = 'block';
+        } else {
+            DEBUG_MODE = false;
+            debugPanel.style.display = 'none';
+        }
+    }
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
