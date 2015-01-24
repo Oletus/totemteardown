@@ -59,7 +59,7 @@ Game.prototype.debugMode = function(e) {
 
 Game.prototype.cursorActive = function(playerNumber) {
     while (this.cursors.length <= playerNumber) {
-        this.cursors.push(new Cursor({block: 0, pole: playerNumber}));
+        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
     }
     return this.cursors[playerNumber];
 };
