@@ -23,7 +23,8 @@ var Game = function() {
     this.backgroundMusic.play();
 
     this.explosionSound = new Audio('explosion', false);
-    this.bearRoar = new Audio('bear', false);
+    this.shieldSound = new Audio('shield', false);
+    this.thunderSound = new Audio('thunder', false);
 
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: this.totemPoleColors[i]}));
@@ -92,6 +93,13 @@ Game.prototype.spawnNewBlocks = function() {
         var type = TotemBlock.typeFromChar(types[this.appearPhase % types.length]);
         pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
     }
+
+
+    this.backgroundMusic.volume = 0.01;
+    this.thunderSound.volume = 0.3;
+    this.thunderSound.play();
+    this.backgroundMusic.volume = 1;
+
     ++this.appearPhase;
 };
 
@@ -226,7 +234,7 @@ Game.prototype.update = function() {
                         }
 
                         if(blocked) {
-                            this.bearRoar.play();
+                            this.shieldSound.play();
                         }
 
                         if (!blocked) {
