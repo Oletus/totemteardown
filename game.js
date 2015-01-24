@@ -32,6 +32,7 @@ var Game = function() {
     this.gamepads.addButtonDownListener(12, this.moveCursorUp);
     this.gamepads.addButtonDownListener(0, this.selectBlock);
     this.gamepads.addButtonDownListener(1, this.deselectBlock);
+    this.gamepads.addButtonDownListener(2, this.removeBlock);
 };
 
 Game.prototype.moveCursorDown = function(playerNumber) {
@@ -70,6 +71,16 @@ Game.prototype.selectBlock = function() {
 
 Game.prototype.deselectBlock = function() {
     this.cursor.selected = false;
+};
+
+Game.prototype.removeBlock = function() {
+    this.totemPoles[0].blocks.splice(this.cursor.index, 1);
+    
+    for(var i = 0; i < this.cursor.index; i++) {
+       this.totemPoles[0].blocks[i].y += 50; 
+    }
+
+    this.render();
 };
 
 // This runs at fixed 60 FPS
