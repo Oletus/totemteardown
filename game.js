@@ -9,13 +9,12 @@ var Game = function() {
 
     this.totemPoles = [];
     this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
-    
     this.dynamicObjs = [];
     
     this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
 
-    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5;
+    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
         startPoleY = 650,
         startBlockY = 10;
 
@@ -33,11 +32,30 @@ var Game = function() {
     }
 
     this.gamepads = new Gamepads(this);
+
     this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
     this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
-    this.gamepads.addButtonChangeListener(0, this.selectBlock, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(0, this.selectBlock);
+    this.gamepads.addButtonChangeListener(1, this.deselectBlock);
     this.gamepads.addButtonChangeListener(2, this.activateBlock);
-    //this.gamepads.addButtonDownListener(2, this.removeBlock);
+    addEventListener("keydown", this.debugMode, false);
+};
+
+Game.prototype.debugMode = function(e) {
+
+
+    var debugPanel = document.getElementById("debug");
+
+    if(e.keyCode === 68) {
+        if(!DEBUG_MODE) {
+            DEBUG_MODE = true;
+            debugPanel.style.display = 'block';
+        } else {
+            DEBUG_MODE = false;
+            debugPanel.style.display = 'none';
+        }
+    }
+
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
