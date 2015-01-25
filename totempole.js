@@ -46,7 +46,7 @@ TotemPole.prototype.update = function() {
 
 TotemPole.prototype.addHead = function() {
     var headY = this.blocks[0].y - BLOCK_HEIGHT;
-    this.blocks.splice(0, 0, new TotemBlock({x: this.x, y: headY, type: TotemBlock.Type.HEAD}));
+    this.blocks.splice(0, 0, new TotemBlock({x: this.x, y: headY, type: TotemBlock.Type.HEAD, hitpoints: -1}));
 };
 
 TotemPole.prototype.render = function() {

@@ -156,7 +156,7 @@ Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
         var lastBlock = pole.blocks[pole.blocks.length - 1];
-        if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state != TotemBlock.APPEARING) {
+        if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state == TotemBlock.APPEARING) {
             this.winnersText.push('player ' + (i + 1));
             if (this.state != Game.VICTORY) {
                 this.state = Game.VICTORY;
@@ -319,9 +319,12 @@ Game.prototype.activateBlock = function(playerNumber) {
 };
 
 /**
- * @return {boolean} True if a block was hit.
+ * @return {boolean} True if the projectile needs to be destroyed.
  */
 Game.prototype.killBlocks = function(killBox) {
+    if (this.state === Game.VICTORY) {
+        return true;
+    }
     for (var j = 0; j < this.totemPoles.length; ++j) {
         for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
             var block = this.totemPoles[j].blocks[k];
@@ -340,6 +343,10 @@ Game.prototype.killBlocks = function(killBox) {
                             blocked = true;
                         }
                     }
+                }
+
+                if (block.type === TotemBlock.Type.HEAD) {
+                    blocked = true;
                 }
 
                 if(blocked) {
