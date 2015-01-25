@@ -8,7 +8,10 @@ var TotemBlock = function(options) {
         state: TotemBlock.SUPPORTED,
         velY: 0,
         facingLeft: false,
-        hitpoints: SHIELD_HITPOINTS
+        hitpoints: SHIELD_HITPOINTS,
+        timeExisted: 0,
+        sinceActivation: 10,
+        canShoot: true
     };
 
     for(var key in defaults) {
@@ -28,6 +31,7 @@ TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
 TotemBlock.FALLING = 2;
 TotemBlock.APPEARING = 3;
+TotemBlock.THRUSTING = 4;
 
 TotemBlock.Type = {
     SHOOTLEFT: 0,
@@ -35,7 +39,9 @@ TotemBlock.Type = {
     SHIELD: 2,
     JUMP: 3,
     EMPTY: 4,
-    STATIC: 5 // used for something like the totem head, that's not interactive
+    INIT: 5,
+    THRUSTER: 6,
+    HEAD: 7
 };
 
 TotemBlock.spriteSrc = [
@@ -43,7 +49,20 @@ TotemBlock.spriteSrc = [
     new Sprite('block_shoot_right.png'),
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
-    new Sprite('block-empty.png')
+    new Sprite('block-empty.png'),
+    new Sprite('block-init.png'),
+    new Sprite('block-thruster.png'),
+    new Sprite('block_shoot_left_charge.png'),
+    new Sprite('block_shoot_right_charge.png'),
+    new Sprite('block_shoot_left_shoot.png'),
+    new Sprite('block_shoot_right_shoot.png')
+];
+
+TotemBlock.headSprites = [
+    new Sprite('head0.png'),
+    new Sprite('head1.png'),
+    new Sprite('head2.png'),
+    new Sprite('head3.png')
 ];
 
 TotemBlock.hitSprites = [
@@ -52,6 +71,10 @@ TotemBlock.hitSprites = [
 ];
 
 TotemBlock.sprites = null;
+
+TotemBlock.whiteSprites = null;
+
+TotemBlock.whiteHeadSprites = null;
 
 TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
@@ -63,43 +86,50 @@ var loadSprites = function() {
             return;
         }
     }
-    TotemBlock.sprites = (function() {
-        var sprites = [];
-        for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
-            var src = TotemBlock.spriteSrc[i];
-            var tintedVariations = [];
-            for (var j = 0; j < 4; ++j) {
-                if (TINTING_AMOUNT > 0) {
-                    var canvas2 = document.createElement('canvas');
-                    canvas2.width = src.width;
-                    canvas2.height = src.height;
-                    var ctx2 = canvas2.getContext('2d');
-                    ctx2.fillStyle = TotemBlock.totemPoleColors[j];
-                    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-                    ctx2.globalCompositeOperation = 'destination-in';
-                    TotemBlock.spriteSrc[i].draw(ctx2, 0, 0);
-
-                    var canvas3 = document.createElement('canvas');
-                    canvas3.width = src.width;
-                    canvas3.height = src.height;
-                    var ctx3 = canvas3.getContext('2d');
-                    TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
-                    ctx3.globalAlpha = TINTING_AMOUNT;
-                    ctx3.drawImage(canvas2, 0, 0);
-                    tintedVariations.push(new Sprite(canvas3));
-                } else {
-                    tintedVariations.push(src);
-                }
-            }
-            sprites.push(tintedVariations);
+    for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
+        var src = TotemBlock.headSprites[i];
+        if (!src.loaded) {
+            setTimeout(loadSprites, 500);
+            return;
         }
-        return sprites;
-    })();
+    }
+    TotemBlock.sprites = [];
+    TotemBlock.whiteSprites = [];
+    TotemBlock.whiteHeadSprites = [];
+    for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
+        var src = TotemBlock.spriteSrc[i];
+        var tintedVariations = [];
+        for (var j = 0; j < 4; ++j) {
+            if (TINTING_AMOUNT > 0) {
+                var solid = src.getSolidColoredVersion(TotemBlock.totemPoleColors[j]);
+
+                var canvas3 = document.createElement('canvas');
+                canvas3.width = src.width;
+                canvas3.height = src.height;
+                var ctx3 = canvas3.getContext('2d');
+                TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
+                ctx3.globalAlpha = TINTING_AMOUNT;
+                solid.draw(ctx3, 0, 0);
+                tintedVariations.push(new Sprite(canvas3));
+            } else {
+                tintedVariations.push(src);
+            }
+        }
+        TotemBlock.sprites.push(tintedVariations);
+        var white = src.getSolidColoredVersion('#fff');
+        TotemBlock.whiteSprites.push(white);
+    }
+
+    for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
+        var src = TotemBlock.headSprites[i];
+        var white = src.getSolidColoredVersion('#fff');
+        TotemBlock.whiteHeadSprites.push(white);
+    }
 };
 
 loadSprites();
 
-TotemBlock.typeFromChar = function(char) {
+TotemBlock.typeFromChar = function(char, leftWingAdvantage) {
     if (char == 'L') {
         return TotemBlock.Type.SHOOTLEFT;
     }
@@ -116,6 +146,12 @@ TotemBlock.typeFromChar = function(char) {
         return TotemBlock.Type.JUMP;
     }
     if (char == 'S') {
+        if (leftWingAdvantage > 0) {
+            return TotemBlock.Type.SHOOTRIGHT;
+        }
+        if (leftWingAdvantage < 0) {
+            return TotemBlock.Type.SHOOTLEFT;
+        }
         return Math.random() > 0.5 ? TotemBlock.Type.SHOOTLEFT : TotemBlock.Type.SHOOTRIGHT;
     }
 };
@@ -129,6 +165,8 @@ TotemBlock.randomType = function() {
 };
 
 TotemBlock.prototype.update = function(supportedLevel) {
+    this.timeExisted += 1/FPS;
+    this.sinceActivation += 1/FPS;
     if (this.state == TotemBlock.APPEARING) {
         if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED * 0.5;
@@ -144,7 +182,7 @@ TotemBlock.prototype.update = function(supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
-        } else if (this.y > supportedLevel) {
+        } else {
             this.y -= SWAP_SPEED;
             if (this.y <= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
@@ -158,6 +196,12 @@ TotemBlock.prototype.update = function(supportedLevel) {
             this.y = supportedLevel;
         } else if (this.y > supportedLevel) {
             this.y = supportedLevel;
+        }
+    } else if (this.state == TotemBlock.THRUSTING) {
+        this.velY -= FALL_ACCELERATION;
+        this.y += this.velY;
+        if (this.y < -100) {
+            this.y = -100;
         }
     }
     
@@ -182,14 +226,37 @@ TotemBlock.prototype.update = function(supportedLevel) {
 
 TotemBlock.prototype.render = function(color) {
     if (TotemBlock.sprites !== null) {
-        TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
-    }
-    
-    if (this.type == TotemBlock.Type.SHIELD) {
-        if (this.hitpoints == 2) {
-            TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
-        } else if (this.hitpoints == 1) {
-            TotemBlock.hitSprites[1].drawRotated(ctx, this.x, this.y, 0);
+        var mainSprite, whiteSprite, yOffset = 0;
+        if (this.type == TotemBlock.Type.HEAD) {
+            mainSprite = TotemBlock.headSprites[color];
+            whiteSprite = TotemBlock.whiteHeadSprites[color];
+            var yOffset = -50;
+        } else {
+            var type = this.type;
+            if (this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) {
+                if (this.sinceActivation < 0.5) {
+                    type += 9;
+                } else if (this.canShoot) {
+                    type += 7;
+                }
+            }
+            mainSprite = TotemBlock.sprites[type][color];
+            whiteSprite = TotemBlock.whiteSprites[type];
+        }
+        
+        mainSprite.drawRotated(ctx, this.x, this.y + yOffset, 0);
+        if (this.timeExisted < 1) {
+            ctx.globalAlpha = 1 - this.timeExisted;
+            whiteSprite.drawRotated(ctx, this.x, this.y + yOffset, 0);
+            ctx.globalAlpha = 1;
+        }
+
+        if (this.type == TotemBlock.Type.SHIELD) {
+            if (this.hitpoints == 2) {
+                TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
+            } else if (this.hitpoints == 1) {
+                TotemBlock.hitSprites[1].drawRotated(ctx, this.x, this.y, 0);
+            }
         }
     }
     // Commented: debug draw mode
@@ -244,6 +311,10 @@ TotemBlock.prototype.render = function(color) {
  * @return {Array} array of created objects
  */
 TotemBlock.prototype.activate = function(playerNumber) {
+    if ((this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) && !this.canShoot) {
+        return [];
+    }
+    this.sinceActivation = 0;
     if (this.type === TotemBlock.Type.SHIELD) {
         this.facingLeft = !this.facingLeft;
     }
@@ -252,27 +323,20 @@ TotemBlock.prototype.activate = function(playerNumber) {
             this.state = TotemBlock.FALLING;
             this.velY -= JUMP_SPEED;
         }
-
         if(SOUND_ON) {
             this.swooshSound.play();
         }
-
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
-
         if(SOUND_ON) {
             this.eagleRoar.play();
         }
-
-
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-
         if(SOUND_ON) {
             this.eagleRoar.play();
         }
-
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];

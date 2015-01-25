@@ -13,30 +13,31 @@ Game.prototype.reset = function() {
     this.dynamicObjs = [];
 
     this.stateTime = 0;
-    this.state = Game.START_COUNTDOWN;
+    this.state = Game.CHOOSE_PLAYERS;
 
     this.blockAppearInterval = BLOCK_APPEAR_INTERVAL;
     this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
-    
-    this.cursors = [];
-    while (this.cursors.length < POLE_COUNT) {
-        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
-    }
 
-    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
+    var startPoleX = POLE_DISTANCE_FROM_EDGE,
         startPoleY = GROUND_LEVEL;
 
     for(var i = 0; i < POLE_COUNT; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
-        var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
+        var startBlockY = startPoleY - (STARTING_BLOCKS + 1) * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
-            startBlockY += BLOCK_HEIGHT * 1.5;
             var types = STARTING_TYPES[i % STARTING_TYPES.length];
             var type = TotemBlock.typeFromChar(types[j % types.length]);
             this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
+            startBlockY += BLOCK_HEIGHT * 1.5;
         }
+        this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: TotemBlock.Type.INIT}));
         startPoleX += POLE_DISTANCE;
+    }
+
+    this.cursors = [];
+    for (var i = 0; i < POLE_COUNT; ++i) {
+        this.cursors.push(new Cursor({block: this.totemPoles[i].blocks.length - 1, pole: i}));
     }
 
     this.gamepads = new Gamepads(this);
@@ -47,6 +48,7 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.RIGHT, this.cursorRight);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
     addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
@@ -54,8 +56,12 @@ Game.prototype.reset = function() {
     }
     
     this.winnersText = undefined;
+    
+    resizeGame();
 };
 
+Game.CHOOSE_PLAYERS = -2;
+Game.PRE_COUNTDOWN = -1;
 Game.START_COUNTDOWN = 0;
 Game.PLAYING = 1;
 Game.VICTORY = 2;
@@ -97,11 +103,21 @@ Game.prototype.cursorActive = function(playerNumber) {
 };
 
 Game.prototype.clampCursor = function(cursor) {
-    if (cursor.block >= this.totemPoles[cursor.pole].blocks.length) {
-        cursor.block = this.totemPoles[cursor.pole].blocks.length - 1;
+    if (cursor.pole >= this.totemPoles.length) {
+        return;
+    }
+    var blocks = this.totemPoles[cursor.pole].blocks;
+    if (cursor.block >= blocks.length) {
+        cursor.block = blocks.length - 1;
     }
     if (cursor.block < 0) {
         cursor.block = 0;
+    }
+    while (blocks[cursor.block].state == TotemBlock.APPEARING && cursor.block > 0) {
+        cursor.block--;
+    }
+    while (blocks[cursor.block].type == TotemBlock.Type.HEAD && cursor.block < blocks.length - 1) {
+        cursor.block++;
     }
 };
 
@@ -113,13 +129,18 @@ Game.prototype.clampAllCursors = function() {
 
 Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
     var decided = false;
+    var leftWing = pole.blockCount(TotemBlock.Type.SHOOTLEFT);
+    var rightWing = pole.blockCount(TotemBlock.Type.SHOOTRIGHT);
     while (!decided) {
-        var type = TotemBlock.typeFromChar(types[tryIndex % types.length]);
+        var type = TotemBlock.typeFromChar(types[tryIndex % types.length], leftWing - rightWing);
         decided = true;
         if (AVOID_CREATING_OVERREPRESENTED_BLOCKS) {
             if (pole.blocks.length > 0 && pole.blockCount(type) >= pole.blocks.length * 0.49) {
                 decided = false;
             }
+        }
+        if (pole.blocks.length > 0 && pole.blocks[pole.blocks.length - 1].type == type) {
+            decided = false;
         }
         ++tryIndex;
     }
@@ -131,7 +152,8 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
     if (pole.blocks.length < VICTORY_BLOCKS) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex);
-        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        var lastBlock = pole.blocks[pole.blocks.length - 1];
+        pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: type, state: TotemBlock.APPEARING}));
 
 
         //game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
@@ -150,8 +172,13 @@ Game.prototype.spawnNewBlocks = function() {
     this.winnersText = [];
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
-        if (pole.blocks.length >= VICTORY_BLOCKS) {
-            this.winnersText.push('player ' + (i + 1));
+        var lastBlock = pole.blocks[pole.blocks.length - 1];
+        if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state == TotemBlock.APPEARING) {
+            var lastBlock = pole.blocks[pole.blocks.length - 1];
+            if (lastBlock.type !== TotemBlock.Type.THRUSTER) {
+                pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: TotemBlock.Type.THRUSTER, state: TotemBlock.THRUSTING}));
+            }
+            this.winnersText.push('P' + (i + 1));
             if (this.state != Game.VICTORY) {
                 this.state = Game.VICTORY;
                 this.stateTime = 0;
@@ -159,7 +186,7 @@ Game.prototype.spawnNewBlocks = function() {
         }
     }
     if (this.state === Game.VICTORY) {
-        this.winnersText = 'Congrats, ' + this.winnersText.join(', ') + '!';
+        this.winnersText = 'CONGRATS, ' + this.winnersText.join(', ') + '!';
     }
 
     Game.backgroundMusic.volume = 0.01;
@@ -174,26 +201,59 @@ Game.prototype.spawnNewBlocks = function() {
     ++this.appearPhase;
 };
 
-Game.prototype.swap = function(pole, blockA, blockB) {
-    if (this.state != Game.PLAYING) {
-        return false;
+Game.prototype.start = function() {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
     }
+    var activePlayers = 0;
+    for (var i = 0; i < this.totemPoles.length; ++i) {
+        if (this.totemPoles[i].isInitialized()) {
+            ++activePlayers;
+        }
+    }
+    if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= MIN_PLAYERS) {
+        this.state = Game.PRE_COUNTDOWN;
+        this.stateTime = 0;
+        for (var i = 0; i < this.totemPoles.length;) {
+            var pole = this.totemPoles[i];
+            if (!pole.isInitialized()) {
+                this.totemPoles.splice(i, 1);
+            } else {
+                ++i;
+            }
+        }
+        resizeGame();
+    }
+};
+
+Game.prototype.swap = function(pole, blockA, blockB) {
     var poleObj = this.totemPoles[pole];
     var a = poleObj.blocks[blockA];
     var b = poleObj.blocks[blockB];
-    if (a.state == TotemBlock.SUPPORTED && b.state == TotemBlock.SUPPORTED) {
-        poleObj.blocks.splice(blockA, 1, b);
-        poleObj.blocks.splice(blockB, 1, a);
-        a.state = TotemBlock.SWAPPING;
-        b.state = TotemBlock.SWAPPING;
-        return true;
+    if (this.state == Game.PLAYING || (a.type == TotemBlock.Type.INIT || b.type == TotemBlock.Type.INIT)) {
+        if (a.state == TotemBlock.SUPPORTED && b.state == TotemBlock.SUPPORTED &&
+                a.type != TotemBlock.Type.HEAD && b.type != TotemBlock.Type.HEAD) {
+            poleObj.blocks.splice(blockA, 1, b);
+            poleObj.blocks.splice(blockB, 1, a);
+            a.state = TotemBlock.SWAPPING;
+            b.state = TotemBlock.SWAPPING;
+            return true;
+        }
+        return false;
+    } else {
+        return false;
     }
-    return false;
 };
 
 Game.prototype.moveCursorDown = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     if(!cursor.selected) {
+        if (this.state == Game.CHOOSE_PLAYERS) {
+            return;
+        }
         cursor.block++;
         this.clampCursor(cursor);
     } else {
@@ -213,6 +273,9 @@ Game.prototype.moveCursorDown = function(playerNumber) {
 Game.prototype.moveCursorUp = function(playerNumber) {
     var cursor = this.cursorActive(playerNumber);
     if(!cursor.selected) {
+        if (this.state == Game.CHOOSE_PLAYERS) {
+            return;
+        }
         cursor.block--;
         this.clampCursor(cursor);
     } else {
@@ -254,14 +317,12 @@ Game.prototype.cursorRight = function(playerNumber) {
 };
 
 Game.prototype.hasBlock = function(pole, block) {
-    return this.totemPoles[pole].blocks.length > block;
+    return this.totemPoles.length > pole && this.totemPoles[pole].blocks.length > block;
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
-    if (this.state === Game.VICTORY) {
-        if (this.stateTime > MIN_VICTORY_TIME) {
-            this.reset();
-        }
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.stateTime += 0.5;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -298,23 +359,36 @@ Game.prototype.activateBlock = function(playerNumber) {
         }
         return;
     }
-    if (this.state == Game.START_COUNTDOWN) {
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.stateTime += 0.5;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
     if (this.hasBlock(cursor.pole, cursor.block)) {
-
-        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber, this.eagleRoar);
-        if (this.activeProjectiles(playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER) {
+        var pole = this.totemPoles[cursor.pole];
+        if (pole.blocks[cursor.block].type == TotemBlock.Type.INIT) {
+            if (cursor.block == 0) {
+                pole.blocks.splice(0, 1);
+                pole.addHead();
+                this.clampAllCursors();
+            }
+        } else {
+            if (this.state == Game.CHOOSE_PLAYERS) {
+                return;
+            }
+            var addedObjs = pole.blocks[cursor.block].activate(playerNumber, this.eagleRoar);
             this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
     }
 };
 
 /**
- * @return {boolean} True if a block was hit.
+ * @return {boolean} True if the projectile needs to be destroyed.
  */
 Game.prototype.killBlocks = function(killBox) {
+    if (this.state === Game.VICTORY) {
+        return true;
+    }
     for (var j = 0; j < this.totemPoles.length; ++j) {
         for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
             var block = this.totemPoles[j].blocks[k];
@@ -333,6 +407,10 @@ Game.prototype.killBlocks = function(killBox) {
                             blocked = true;
                         }
                     }
+                }
+
+                if (block.type === TotemBlock.Type.HEAD) {
+                    blocked = true;
                 }
 
                 if(blocked) {
@@ -369,6 +447,12 @@ Game.prototype.update = function() {
     this.gamepads.update();
 
     this.stateTime += 1/FPS;
+    if (this.state === Game.PRE_COUNTDOWN) {
+        if (this.stateTime > PRE_COUNTDOWN_DURATION) {
+            this.state = Game.START_COUNTDOWN;
+            this.stateTime = 0;
+        }
+    }
     if (this.state === Game.START_COUNTDOWN) {
         if (this.stateTime > START_COUNTDOWN_DURATION) {
             this.state = Game.PLAYING;
@@ -378,7 +462,8 @@ Game.prototype.update = function() {
 
     for(i = 0; i < this.totemPoles.length; i++) {
         var pole = this.totemPoles[i];
-        pole.update();
+        var canShoot = (this.activeProjectiles(i) < MAX_ACTIVE_PROJECTILES_PER_PLAYER);
+        pole.update(canShoot);
         while (pole.spawnBlocks > 0) {
             this.spawnBlockInPole(i, pole.spawnBlocks);
             pole.spawnBlocks--;
@@ -409,13 +494,15 @@ Game.prototype.update = function() {
         }
     }
 
-    this.blockAppearTimer += 1/FPS;
-    if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval && this.state == Game.PLAYING) {
-        this.blockAppearTimer = 0;
-        this.spawnNewBlocks();
-        this.blockAppearInterval -= BLOCK_APPEAR_INTERVAL_REDUCE;
-        if (this.blockAppearInterval < BLOCK_APPEAR_INTERVAL_MIN) {
-            this.blockAppearInterval = BLOCK_APPEAR_INTERVAL_MIN;
+    if (this.state == Game.PLAYING) {
+        this.blockAppearTimer += 1/FPS;
+        if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval) {
+            this.blockAppearTimer = 0;
+            this.spawnNewBlocks();
+            this.blockAppearInterval -= BLOCK_APPEAR_INTERVAL_REDUCE;
+            if (this.blockAppearInterval < BLOCK_APPEAR_INTERVAL_MIN) {
+                this.blockAppearInterval = BLOCK_APPEAR_INTERVAL_MIN;
+            }
         }
     }
 
@@ -438,24 +525,13 @@ Game.prototype.render = function() {
         this.totemPoles[i].render();
     }
 
-    for (i = 0; i < this.cursors.length; ++i) {
-        var cursor = this.cursors[i];
-        if (this.hasBlock(cursor.pole, cursor.block)) {
-            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
-            Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
-
-            /*ctx.strokeStyle = TotemBlock.totemPoleColors[i];
-            ctx.lineWidth = 6;
-            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
-
-            ctx.strokeStyle = '#fff';
-            if (cursor.selected) {
-                ctx.lineWidth = 4;
-            } else {
-                ctx.lineWidth = 2;
+    if (this.state !== Game.VICTORY) {
+        for (i = 0; i < this.cursors.length; ++i) {
+            var cursor = this.cursors[i];
+            if (this.hasBlock(cursor.pole, cursor.block)) {
+                var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+                Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
             }
-            
-            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);*/
         }
     }
     
@@ -463,39 +539,13 @@ Game.prototype.render = function() {
         this.dynamicObjs[i].render();
     }
     
-    Game.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + Game.fg.height * 0.2, 0, ctx.canvas.width / Game.fg.width);
+    Game.fg.draw(ctx, 0, GROUND_LEVEL - Game.fg.height * 0.15);
 
     if(game.emitters.length > 0) {
         drawParticles();
     }
 
-    ctx.font = '100px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.2);
-    ctx.fillStyle = '#000';
-    if (this.state === Game.START_COUNTDOWN) {
-        var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
-        var currentNumberTime = mathUtil.fmod(numTime, 1.0);
-        var num = 3 - Math.floor(numTime);
-        var s = 1.6 - currentNumberTime * 0.6;
-        ctx.scale(s, s);
-        ctx.fillText(num, 0, 0);
-    } else if (this.state === Game.PLAYING) {
-        if (this.stateTime < 1) {
-            var s = this.stateTime + 1;
-            ctx.scale(s, s);
-            ctx.globalAlpha = 1 - this.stateTime;
-            ctx.fillText('PLAY!', 0, 0);
-        }
-    } else if (this.state === Game.VICTORY) {
-        ctx.scale(0.5, 0.5);
-        ctx.fillStyle = '#000';
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = '#fff';
-        ctx.fillText(this.winnersText, 0, 0);
-    }
+    this.drawHud();
 
     if(game.emitters.length > 0) {
         killEmitter(0);
@@ -548,7 +598,12 @@ var initGame = function() {
 
 var resizeGame = function() {
     var gameArea = document.getElementById('gameArea');
-    var widthToHeight = 4 / 3;
+    var poles = POLE_COUNT;
+    if (game && game.totemPoles.length > 0) {
+        poles = game.totemPoles.length;
+    }
+    screenWidthForPlayerCount = (poles - 1) * POLE_DISTANCE + 2 * POLE_DISTANCE_FROM_EDGE;
+    var widthToHeight = screenWidthForPlayerCount / SCREEN_HEIGHT;
     var newWidth = window.innerWidth;
     var newHeight = window.innerHeight;
     var newWidthToHeight = newWidth / newHeight;
@@ -567,8 +622,8 @@ var resizeGame = function() {
     gameArea.style.marginLeft = (-newWidth / 2) + 'px';
 
     var gameCanvas = document.getElementById('totemGame');
-    gameCanvas.width = newWidth;
-    gameCanvas.height = newHeight;
+    gameCanvas.width = screenWidthForPlayerCount;
+    gameCanvas.height = SCREEN_HEIGHT;
 };
 
 window.addEventListener('resize', resizeGame, false);
@@ -592,8 +647,6 @@ var plotParticles = function(boundsX, boundsY) {
 
         if (pos.x < 0 || pos.x > boundsX || pos.y < 0 || pos.y > boundsY) continue;
 
-        //particle.submitToFields(game.fields);
-
         particle.move();
 
         currentParticles.push(particle);
@@ -603,8 +656,6 @@ var plotParticles = function(boundsX, boundsY) {
 };
 
 var drawParticles = function() {
-
-    console.log('here');
 
     ctx.fillStyle = 'rgb(125,47,12)';
     for (var i = 0; i < game.particles.length; i++) {

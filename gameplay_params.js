@@ -5,8 +5,9 @@ JUMP_SPEED = 7;
 SHOT_SPEED = 3.5;
 
 POLE_COUNT = 4;
-POLE_DISTANCE = 240;
-SCREEN_WIDTH = 1100;
+POLE_DISTANCE = 250;
+POLE_DISTANCE_FROM_EDGE = 200;
+SCREEN_HEIGHT = 800;
 
 STARTING_BLOCKS = 6;
 BLOCK_HEIGHT = 50;
@@ -24,8 +25,7 @@ BLOCK_BOTH_DIRECTIONS = true;
 HOLD_TO_SWAP = true;
 
 STARTING_TYPES = [
-    'LBEJBBRJEB',
-    'LBEJBBRJEB',
+    'LBEJRBRJEB',
     'BREJBLBJEB'
 ];
 
@@ -43,11 +43,12 @@ MATCH_THREE_EMPTY = true;
 
 SHIELD_HITPOINTS = 3; // Set to -1 for invulnerable
 
-FIRST_BLOCK_APPEAR = 15; // seconds
+FIRST_BLOCK_APPEAR = 12; // seconds
 BLOCK_APPEAR_INTERVAL = 6; // seconds
 BLOCK_APPEAR_INTERVAL_REDUCE = 1; // seconds, each block appearing reduces the interval with this value
 BLOCK_APPEAR_INTERVAL_MIN = 4; // seconds
 
+PRE_COUNTDOWN_DURATION = 3; // seconds
 START_COUNTDOWN_DURATION = 3; // seconds
 MIN_VICTORY_TIME = 1; // seconds
 
@@ -67,3 +68,5 @@ EMISSION_RATE = 5;
 OBJECT_SIZE = 5;
 
 GRAVITY = 9.8;
+
+MIN_PLAYERS = 2;
