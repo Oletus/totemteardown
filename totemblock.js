@@ -31,6 +31,7 @@ TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
 TotemBlock.FALLING = 2;
 TotemBlock.APPEARING = 3;
+TotemBlock.THRUSTING = 4;
 
 TotemBlock.Type = {
     SHOOTLEFT: 0,
@@ -39,7 +40,8 @@ TotemBlock.Type = {
     JUMP: 3,
     EMPTY: 4,
     INIT: 5,
-    HEAD: 6
+    THRUSTER: 6,
+    HEAD: 7
 };
 
 TotemBlock.spriteSrc = [
@@ -49,6 +51,7 @@ TotemBlock.spriteSrc = [
     new Sprite('block-jump.png'),
     new Sprite('block-empty.png'),
     new Sprite('block-init.png'),
+    new Sprite('block-thruster.png'),
     new Sprite('block_shoot_left_charge.png'),
     new Sprite('block_shoot_right_charge.png'),
     new Sprite('block_shoot_left_shoot.png'),
@@ -194,6 +197,12 @@ TotemBlock.prototype.update = function(supportedLevel) {
         } else if (this.y > supportedLevel) {
             this.y = supportedLevel;
         }
+    } else if (this.state == TotemBlock.THRUSTING) {
+        this.velY -= FALL_ACCELERATION;
+        this.y += this.velY;
+        if (this.y < -100) {
+            this.y = -100;
+        }
     }
     
     if (this.state == TotemBlock.FALLING) {
@@ -226,9 +235,9 @@ TotemBlock.prototype.render = function(color) {
             var type = this.type;
             if (this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) {
                 if (this.sinceActivation < 0.5) {
-                    type += 8;
+                    type += 9;
                 } else if (this.canShoot) {
-                    type += 6;
+                    type += 7;
                 }
             }
             mainSprite = TotemBlock.sprites[type][color];

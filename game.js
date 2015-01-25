@@ -151,7 +151,8 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
     if (pole.blocks.length < VICTORY_BLOCKS) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex);
-        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        var lastBlock = pole.blocks[pole.blocks.length - 1];
+        pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: type, state: TotemBlock.APPEARING}));
 
 
         game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
@@ -172,6 +173,10 @@ Game.prototype.spawnNewBlocks = function() {
         var pole = this.totemPoles[i];
         var lastBlock = pole.blocks[pole.blocks.length - 1];
         if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state == TotemBlock.APPEARING) {
+            var lastBlock = pole.blocks[pole.blocks.length - 1];
+            if (lastBlock.type !== TotemBlock.Type.THRUSTER) {
+                pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: TotemBlock.Type.THRUSTER, state: TotemBlock.THRUSTING}));
+            }
             this.winnersText.push('P' + (i + 1));
             if (this.state != Game.VICTORY) {
                 this.state = Game.VICTORY;
@@ -202,7 +207,7 @@ Game.prototype.start = function() {
             ++activePlayers;
         }
     }
-    if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= 2) {
+    if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= MIN_PLAYERS) {
         this.state = Game.START_COUNTDOWN;
         this.stateTime = 0;
         for (var i = 0; i < this.totemPoles.length;) {
