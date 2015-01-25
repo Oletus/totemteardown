@@ -3,7 +3,7 @@ var TotemPole = function(options) {
         x: 0,
         y: 0,
         blocks: [],
-        color: 'black'
+        color: 0
     };
 
     for(var key in defaults) {

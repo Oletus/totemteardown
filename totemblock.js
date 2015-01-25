@@ -33,13 +33,57 @@ TotemBlock.Type = {
     STATIC: 5 // used for something like the totem head, that's not interactive
 };
 
-TotemBlock.sprites = [
+TotemBlock.spriteSrc = [
     new Sprite('block-shoot_left.png'),
     new Sprite('block-shoot_right.png'),
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
     new Sprite('block-empty.png')
-]
+];
+
+TotemBlock.sprites = null;
+
+TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
+
+var loadSprites = function() {
+    for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
+        var src = TotemBlock.spriteSrc[i];
+        if (!src.loaded) {
+            setTimeout(loadSprites, 500);
+            return;
+        }
+    }
+    TotemBlock.sprites = (function() {
+        var sprites = [];
+        for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
+            var src = TotemBlock.spriteSrc[i];
+            var tintedVariations = [];
+            for (var j = 0; j < 4; ++j) {
+                var canvas2 = document.createElement('canvas');
+                canvas2.width = src.width;
+                canvas2.height = src.height;
+                var ctx2 = canvas2.getContext('2d');
+                ctx2.fillStyle = TotemBlock.totemPoleColors[j];
+                ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+                ctx2.globalCompositeOperation = 'destination-in';
+                TotemBlock.spriteSrc[i].draw(ctx2, 0, 0);
+
+                var canvas3 = document.createElement('canvas');
+                canvas3.width = src.width;
+                canvas3.height = src.height;
+                var ctx3 = canvas3.getContext('2d');
+                TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
+                ctx3.globalAlpha = TINTING_AMOUNT;
+                ctx3.drawImage(canvas2, 0, 0);
+                tintedVariations.push(new Sprite(canvas3));
+            }
+            sprites.push(tintedVariations);
+        }
+        return sprites;
+    })();
+};
+
+loadSprites();
 
 TotemBlock.typeFromChar = function(char) {
     if (char == 'L') {
@@ -119,7 +163,9 @@ TotemBlock.prototype.update = function(supportedLevel) {
 };
 
 TotemBlock.prototype.render = function(color) {
-    TotemBlock.sprites[this.type].drawRotated(ctx, this.x, this.y, 0);
+    if (TotemBlock.sprites !== null) {
+        TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
+    }
     // Commented: debug draw mode
     /*ctx.fillStyle = color;
     canvasUtil.fillCenteredRect(ctx, this.x, this.y, this.width, this.height);
