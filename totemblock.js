@@ -46,6 +46,11 @@ TotemBlock.spriteSrc = [
     new Sprite('block-empty.png')
 ];
 
+TotemBlock.hitSprites = [
+    new Sprite('block-shield-broken-1.png'),
+    new Sprite('block-shield-broken-2.png')
+];
+
 TotemBlock.sprites = null;
 
 TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
@@ -178,6 +183,14 @@ TotemBlock.prototype.update = function(supportedLevel) {
 TotemBlock.prototype.render = function(color) {
     if (TotemBlock.sprites !== null) {
         TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
+    }
+    
+    if (this.type == TotemBlock.Type.SHIELD) {
+        if (this.hitpoints == 2) {
+            TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
+        } else if (this.hitpoints == 1) {
+            TotemBlock.hitSprites[1].drawRotated(ctx, this.x, this.y, 0);
+        }
     }
     // Commented: debug draw mode
     /*ctx.fillStyle = color;

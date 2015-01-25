@@ -273,6 +273,58 @@ Game.prototype.activateBlock = function(playerNumber) {
     }
 };
 
+/**
+ * @return {boolean} True if a block was hit.
+ */
+Game.prototype.killBlocks = function(killBox) {
+    for (var j = 0; j < this.totemPoles.length; ++j) {
+        for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
+            var block = this.totemPoles[j].blocks[k];
+            var hitBox = block.hitBox();
+            hitBox.intersectRect(killBox);
+            if (!hitBox.isEmpty()) {
+                var blocked = false;
+                if (block.type === TotemBlock.Type.SHIELD) {
+                    if (BLOCK_BOTH_DIRECTIONS) {
+                        blocked = true;
+                    } else {
+                        if (obj.velX < 0 && !block.facingLeft) {
+                            blocked = true;
+                        }
+                        if (obj.velX > 0 && block.facingLeft) {
+                            blocked = true;
+                        }
+                    }
+                }
+
+                if(blocked) {
+                    if (block.hitpoints >= 0) {
+                        block.hitpoints -= 1;
+                        if (block.hitpoints <= 0) {
+                            blocked = false;
+                        }
+                    }
+                    if(blocked && SOUND_ON) {
+                        this.shieldSound.play();
+                    }
+                }
+
+                if (!blocked) {
+
+                    if(SOUND_ON) {
+                        this.explosionSound.play();
+                    }
+
+                    this.totemPoles[j].blocks.splice(k, 1);
+                    this.clampAllCursors();
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
     var i;
@@ -302,50 +354,8 @@ Game.prototype.update = function() {
             this.dynamicObjs.splice(i, 1);
         } else {
             var killBox = obj.killBox();
-            for (var j = 0; j < this.totemPoles.length; ++j) {
-                for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
-                    var block = this.totemPoles[j].blocks[k];
-                    var hitBox = block.hitBox();
-                    hitBox.intersectRect(killBox);
-                    if (!hitBox.isEmpty()) {
-                        var blocked = false;
-                        if (block.type === TotemBlock.Type.SHIELD) {
-                            if (BLOCK_BOTH_DIRECTIONS) {
-                                blocked = true;
-                            } else {
-                                if (obj.velX < 0 && !block.facingLeft) {
-                                    blocked = true;
-                                }
-                                if (obj.velX > 0 && block.facingLeft) {
-                                    blocked = true;
-                                }
-                            }
-                        }
-
-                        if(blocked) {
-                            if (block.hitpoints >= 0) {
-                                block.hitpoints -= 1;
-                                if (block.hitpoints <= 0) {
-                                    blocked = false;
-                                }
-                            }
-                            if(blocked && SOUND_ON) {
-                                this.shieldSound.play();
-                            }
-                        }
-
-                        if (!blocked) {
-
-                            if(SOUND_ON) {
-                                this.explosionSound.play();
-                            }
-
-                            this.totemPoles[j].blocks.splice(k, 1);
-                            this.clampAllCursors();
-                        }
-                        this.dynamicObjs.splice(i, 1);
-                    }
-                }
+            if (this.killBlocks(killBox)) {
+                this.dynamicObjs.splice(i, 1);
             }
         }
     }
