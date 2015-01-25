@@ -7,7 +7,8 @@ var TotemBlock = function(options) {
         type: 0,
         state: TotemBlock.SUPPORTED,
         velY: 0,
-        facingLeft: false
+        facingLeft: false,
+        hitpoints: SHIELD_HITPOINTS
     };
 
     for(var key in defaults) {

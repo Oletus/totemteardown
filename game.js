@@ -315,7 +315,13 @@ Game.prototype.update = function() {
                         }
 
                         if(blocked) {
-                            if(SOUND_ON) {
+                            if (block.hitpoints >= 0) {
+                                block.hitpoints -= 1;
+                                if (block.hitpoints <= 0) {
+                                    blocked = false;
+                                }
+                            }
+                            if(blocked && SOUND_ON) {
                                 this.shieldSound.play();
                             }
                         }
