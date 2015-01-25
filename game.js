@@ -98,11 +98,15 @@ Game.prototype.cursorActive = function(playerNumber) {
 };
 
 Game.prototype.clampCursor = function(cursor) {
-    if (cursor.block >= this.totemPoles[cursor.pole].blocks.length) {
-        cursor.block = this.totemPoles[cursor.pole].blocks.length - 1;
+    var blocks = this.totemPoles[cursor.pole].blocks;
+    if (cursor.block >= blocks.length) {
+        cursor.block = blocks.length - 1;
     }
     if (cursor.block < 1) {
         cursor.block = 1;
+    }
+    while (blocks[cursor.block].state == TotemBlock.APPEARING && cursor.block > 0) {
+        cursor.block--;
     }
 };
 
@@ -151,7 +155,8 @@ Game.prototype.spawnNewBlocks = function() {
     this.winnersText = [];
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
-        if (pole.blocks.length >= VICTORY_BLOCKS) {
+        var lastBlock = pole.blocks[pole.blocks.length - 1];
+        if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state != TotemBlock.APPEARING) {
             this.winnersText.push('player ' + (i + 1));
             if (this.state != Game.VICTORY) {
                 this.state = Game.VICTORY;
@@ -182,7 +187,8 @@ Game.prototype.swap = function(pole, blockA, blockB) {
     var poleObj = this.totemPoles[pole];
     var a = poleObj.blocks[blockA];
     var b = poleObj.blocks[blockB];
-    if (a.state == TotemBlock.SUPPORTED && b.state == TotemBlock.SUPPORTED) {
+    if (a.state == TotemBlock.SUPPORTED && b.state == TotemBlock.SUPPORTED &&
+            a.type != TotemBlock.Type.HEAD && b.type != TotemBlock.Type.HEAD) {
         poleObj.blocks.splice(blockA, 1, b);
         poleObj.blocks.splice(blockB, 1, a);
         a.state = TotemBlock.SWAPPING;
@@ -428,24 +434,13 @@ Game.prototype.render = function() {
         this.totemPoles[i].render();
     }
 
-    for (i = 0; i < this.cursors.length; ++i) {
-        var cursor = this.cursors[i];
-        if (this.hasBlock(cursor.pole, cursor.block)) {
-            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
-            Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
-
-            /*ctx.strokeStyle = TotemBlock.totemPoleColors[i];
-            ctx.lineWidth = 6;
-            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
-
-            ctx.strokeStyle = '#fff';
-            if (cursor.selected) {
-                ctx.lineWidth = 4;
-            } else {
-                ctx.lineWidth = 2;
+    if (this.state !== Game.VICTORY) {
+        for (i = 0; i < this.cursors.length; ++i) {
+            var cursor = this.cursors[i];
+            if (this.hasBlock(cursor.pole, cursor.block)) {
+                var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+                Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
             }
-            
-            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);*/
         }
     }
     

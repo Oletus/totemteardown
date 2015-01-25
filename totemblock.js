@@ -144,7 +144,7 @@ TotemBlock.prototype.update = function(supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
                 this.y = supportedLevel;
             }
-        } else if (this.y > supportedLevel) {
+        } else {
             this.y -= SWAP_SPEED;
             if (this.y <= supportedLevel) {
                 this.state = TotemBlock.SUPPORTED;
