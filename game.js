@@ -60,7 +60,8 @@ Game.prototype.reset = function() {
     resizeGame();
 };
 
-Game.CHOOSE_PLAYERS = -1;
+Game.CHOOSE_PLAYERS = -2;
+Game.PRE_COUNTDOWN = -1;
 Game.START_COUNTDOWN = 0;
 Game.PLAYING = 1;
 Game.VICTORY = 2;
@@ -208,7 +209,7 @@ Game.prototype.start = function() {
         }
     }
     if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= MIN_PLAYERS) {
-        this.state = Game.START_COUNTDOWN;
+        this.state = Game.PRE_COUNTDOWN;
         this.stateTime = 0;
         for (var i = 0; i < this.totemPoles.length;) {
             var pole = this.totemPoles[i];
@@ -354,7 +355,7 @@ Game.prototype.activateBlock = function(playerNumber) {
         }
         return;
     }
-    if (this.state == Game.START_COUNTDOWN) {
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -441,6 +442,12 @@ Game.prototype.update = function() {
     this.gamepads.update();
 
     this.stateTime += 1/FPS;
+    if (this.state === Game.PRE_COUNTDOWN) {
+        if (this.stateTime > PRE_COUNTDOWN_DURATION) {
+            this.state = Game.START_COUNTDOWN;
+            this.stateTime = 0;
+        }
+    }
     if (this.state === Game.START_COUNTDOWN) {
         if (this.stateTime > START_COUNTDOWN_DURATION) {
             this.state = Game.PLAYING;

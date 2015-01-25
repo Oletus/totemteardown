@@ -111,10 +111,21 @@ Game.prototype.drawHud = function() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    if (this.state === Game.START_COUNTDOWN) {
-        var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
+    if (this.state === Game.PRE_COUNTDOWN) {
+        var numTime = this.stateTime / PRE_COUNTDOWN_DURATION;
+        var s = 1.3 - numTime * 0.3;
+        ctx.scale(s, s);
+        var txt = 'BE THE FIRST';
+        ctx.fillText(txt, 0, -50);
+        ctx.strokeText(txt, 0, -50);
+        var txt2 = 'TO REACH THE TOP';
+        ctx.fillText(txt2, 0, 50);
+        ctx.strokeText(txt2, 0, 50);
+    } else if (this.state === Game.START_COUNTDOWN) {
+        var NUM_TIME_STEPS = 3;
+        var numTime = this.stateTime / START_COUNTDOWN_DURATION * NUM_TIME_STEPS;
         var currentNumberTime = mathUtil.fmod(numTime, 1.0);
-        var num = 3 - Math.floor(numTime);
+        var num = NUM_TIME_STEPS - Math.floor(numTime);
         var s = 1.6 - currentNumberTime * 0.6;
         ctx.scale(s, s);
         ctx.fillText(num, 0, 0);

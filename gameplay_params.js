@@ -48,6 +48,7 @@ BLOCK_APPEAR_INTERVAL = 6; // seconds
 BLOCK_APPEAR_INTERVAL_REDUCE = 1; // seconds, each block appearing reduces the interval with this value
 BLOCK_APPEAR_INTERVAL_MIN = 4; // seconds
 
+PRE_COUNTDOWN_DURATION = 3; // seconds
 START_COUNTDOWN_DURATION = 3; // seconds
 MIN_VICTORY_TIME = 1; // seconds
 
