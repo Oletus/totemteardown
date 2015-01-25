@@ -10,7 +10,6 @@ var Game = function() {
     this.bg = new Sprite('BackgroundSky.png');
 
     this.totemPoles = [];
-    this.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
     this.dynamicObjs = [];
     
     this.stateTime = 0;
@@ -35,7 +34,7 @@ var Game = function() {
     this.thunderSound = new Audio('thunder', false);
 
     for(var i = 0; i < 4; i++) {
-        this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: this.totemPoleColors[i]}));
+        this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
             startBlockY += BLOCK_HEIGHT * 1.5;
