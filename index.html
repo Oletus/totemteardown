@@ -10,6 +10,12 @@
     html, body {
         width: 100%;
         height: 100%;
+
+
+    }
+
+    body {
+        background-color: #000;
     }
 
     #gameArea {
@@ -36,7 +42,7 @@
 <script src="gameplay_params.js"></script>
 </head>
 <body onload="initGame()">
-    <div id="debug" style="display: none;">
+    <div id="debug" style="display: none; background-color: #fff">
         Bullet Speed: <input id="bulletspeed" type="text" value="" /><br />
         Swap Speed: <input id="swapspeed" type="text" value="" /><br />
         Fall Acceleration: <input id="fallaccel" type="text" value="" /><br />

@@ -34,7 +34,7 @@ var Game = function() {
     this.shieldSound = new Audio('shield', false);
     this.thunderSound = new Audio('thunder', false);
 
-    for(var i = 0; i < 4; i++) {
+    for(var i = 0; i < POLE_COUNT; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
@@ -447,9 +447,9 @@ var initGame = function() {
 
     ctx = canvas.getContext('2d');
 
-    ctx.canvas.width = window.innerWidth;
+    //ctx.canvas.width = window.innerWidth;
 
-    ctx.canvas.height = window.innerHeight;
+    //ctx.canvas.height = window.innerHeight;
 
     game = new Game();
     
@@ -480,8 +480,6 @@ var resizeGame = function() {
     var gameCanvas = document.getElementById('totemGame');
     gameCanvas.width = newWidth;
     gameCanvas.height = newHeight;
-
-    GROUND_LEVEL = newHeight - 145;
 };
 
 window.addEventListener('resize', resizeGame, false);

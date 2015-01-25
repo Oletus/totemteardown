@@ -4,7 +4,7 @@ FALL_SPEED = 5;
 JUMP_SPEED = 7;
 SHOT_SPEED = 3;
 
-POLE_COUNT = 4;
+POLE_COUNT = 3;
 POLE_DISTANCE = 240;
 SCREEN_WIDTH = 1100;
 
@@ -13,7 +13,7 @@ BLOCK_HEIGHT = 50;
 
 DEBUG_MODE = false;
 
-GROUND_LEVEL = 650; // canvas pixels
+GROUND_LEVEL = 720; // canvas pixels
 
 VICTORY_BLOCKS = 12;
 
