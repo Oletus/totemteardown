@@ -33,8 +33,6 @@ var Game = function() {
     this.shieldSound = new Audio('shield', false);
     this.thunderSound = new Audio('thunder', false);
 
-    this.particleSystem = new ParticleSystem();
-
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
@@ -254,6 +252,7 @@ Game.prototype.update = function() {
    for(i = 0; i < this.totemPoles.length; i++) {
        this.totemPoles[i].update();
    }
+
    
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         var obj = this.dynamicObjs[i];
@@ -293,6 +292,12 @@ Game.prototype.update = function() {
                             if(SOUND_ON) {
                                 this.explosionSound.play();
                             }
+
+                            var killedBlock = this.totemPoles[j].blocks[k];
+
+                            this.emitter = new ParticleEmitter(new Vector(killedBlock.x, killedBlock.y), Vector.fromAngle(0, 2), Math.PI / 32, 100, ctx);
+
+                            this.emitter.update(800, 600);
 
                             this.totemPoles[j].blocks.splice(k, 1);
                             this.clampAllCursors();
@@ -366,6 +371,11 @@ Game.prototype.render = function() {
             ctx.fillText('PLAY!', 0, 0);
         }
     }
+
+    if(this.emitter) {
+        this.emitter.drawParticles();
+    }
+
     ctx.restore();
 };
 
