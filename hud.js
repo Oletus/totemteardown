@@ -65,10 +65,6 @@ Game.prototype.drawHud = function() {
                 count += 1
                 text = "READY!"
             }
-            if( this.totemPoles[i].isInitialized() >= 2 )
-            {
-                text = "PRESS START!"
-            }
         } else {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
@@ -113,7 +109,7 @@ Game.prototype.drawHud = function() {
 
     if (this.state === Game.CHOOSE_PLAYERS)
     {
-        if( count >= 2 )
+        if( count >= MIN_PLAYERS )
         {
                 ctx.scale(1.0, 1.0);
                 ctx.fillStyle = '#ff0000';
