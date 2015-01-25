@@ -513,40 +513,7 @@ Game.prototype.render = function() {
         drawParticles();
     }
 
-    ctx.scale(1.0, 1.0);
-    ctx.fillStyle = '#ff0000';
-    ctx.shadowBlur = 1;
-    ctx.shadowColor = '#000';
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 5;
-    ctx.font="italic bold 100px Myriad Pro";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.35);
-    ctx.scale(ctx.canvas.width / 1200, ctx.canvas.width / 1200);
-
-    if (this.state === Game.START_COUNTDOWN) {
-        var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
-        var currentNumberTime = mathUtil.fmod(numTime, 1.0);
-        var num = 3 - Math.floor(numTime);
-        var s = 1.6 - currentNumberTime * 0.6;
-        ctx.scale(s, s);
-        ctx.fillText(num, 0, 0);
-        ctx.strokeText(num, 0, 0);
-    } else if (this.state === Game.PLAYING) {
-        if (this.stateTime < 1) {
-            var s = this.stateTime + 1;
-            ctx.scale(s, s);
-            ctx.globalAlpha = 1 - this.stateTime;
-            ctx.fillText('TAKEDOWN!', 0, 0);
-            ctx.strokeText('TAKEDOWN!', 0, 0);
-        }
-    } else if (this.state === Game.VICTORY) {
-        ctx.scale(0.75, 0.75);
-        ctx.fillText(this.winnersText, 0, 0);
-        ctx.strokeText(this.winnersText, 0, 0);
-    }
+    this.drawHud();
 
     if(game.emitters.length > 0) {
         killEmitter(0);
