@@ -8,7 +8,8 @@ var TotemBlock = function(options) {
         state: TotemBlock.SUPPORTED,
         velY: 0,
         facingLeft: false,
-        hitpoints: SHIELD_HITPOINTS
+        hitpoints: SHIELD_HITPOINTS,
+        timeExisted: 0
     };
 
     for(var key in defaults) {
@@ -64,6 +65,8 @@ TotemBlock.sprites = null;
 
 TotemBlock.whiteSprites = null;
 
+TotemBlock.whiteHeadSprites = null;
+
 TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
 var loadSprites = function() {
@@ -74,8 +77,16 @@ var loadSprites = function() {
             return;
         }
     }
+    for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
+        var src = TotemBlock.headSprites[i];
+        if (!src.loaded) {
+            setTimeout(loadSprites, 500);
+            return;
+        }
+    }
     TotemBlock.sprites = [];
     TotemBlock.whiteSprites = [];
+    TotemBlock.whiteHeadSprites = [];
     for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
         var src = TotemBlock.spriteSrc[i];
         var tintedVariations = [];
@@ -98,6 +109,12 @@ var loadSprites = function() {
         TotemBlock.sprites.push(tintedVariations);
         var white = src.getSolidColoredVersion('#fff');
         TotemBlock.whiteSprites.push(white);
+    }
+
+    for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
+        var src = TotemBlock.headSprites[i];
+        var white = src.getSolidColoredVersion('#fff');
+        TotemBlock.whiteHeadSprites.push(white);
     }
 };
 
@@ -133,6 +150,7 @@ TotemBlock.randomType = function() {
 };
 
 TotemBlock.prototype.update = function(supportedLevel) {
+    this.timeExisted += 1/FPS;
     if (this.state == TotemBlock.APPEARING) {
         if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED * 0.5;
@@ -185,13 +203,24 @@ TotemBlock.prototype.update = function(supportedLevel) {
 };
 
 TotemBlock.prototype.render = function(color) {
-    if (this.type == TotemBlock.Type.HEAD) {
-        TotemBlock.headSprites[color].drawRotated(ctx, this.x, this.y - 50, 0);
-    } else {
-        if (TotemBlock.sprites !== null) {
-            TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
+    if (TotemBlock.sprites !== null) {
+        var mainSprite, whiteSprite, yOffset = 0;
+        if (this.type == TotemBlock.Type.HEAD) {
+            mainSprite = TotemBlock.headSprites[color];
+            whiteSprite = TotemBlock.whiteHeadSprites[color];
+            var yOffset = -50;
+        } else {
+            mainSprite = TotemBlock.sprites[this.type][color];
+            whiteSprite = TotemBlock.whiteSprites[this.type];
         }
         
+        mainSprite.drawRotated(ctx, this.x, this.y + yOffset, 0);
+        if (this.timeExisted < 1) {
+            ctx.globalAlpha = 1 - this.timeExisted;
+            whiteSprite.drawRotated(ctx, this.x, this.y + yOffset, 0);
+            ctx.globalAlpha = 1;
+        }
+
         if (this.type == TotemBlock.Type.SHIELD) {
             if (this.hitpoints == 2) {
                 TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
