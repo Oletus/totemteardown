@@ -16,11 +16,12 @@ var TotemPole = function(options) {
     }
 };
 
-TotemPole.prototype.update = function() {
+TotemPole.prototype.update = function(canShoot) {
     // Iterate blocks from bottom to top
     var supportedLevel = this.y - BLOCK_HEIGHT * 0.5;
     var chain = 0;
     for (var i = this.blocks.length - 1; i >= 0; --i) {
+        this.blocks[i].canShoot = canShoot;
         this.blocks[i].update(supportedLevel);
         if (this.blocks[i].state != TotemBlock.SWAPPING) {
             supportedLevel = this.blocks[i].y - BLOCK_HEIGHT;

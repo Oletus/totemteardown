@@ -9,7 +9,9 @@ var TotemBlock = function(options) {
         velY: 0,
         facingLeft: false,
         hitpoints: SHIELD_HITPOINTS,
-        timeExisted: 0
+        timeExisted: 0,
+        sinceActivation: 10,
+        canShoot: true
     };
 
     for(var key in defaults) {
@@ -46,7 +48,11 @@ TotemBlock.spriteSrc = [
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
     new Sprite('block-empty.png'),
-    new Sprite('block-init.png')
+    new Sprite('block-init.png'),
+    new Sprite('block_shoot_left_charge.png'),
+    new Sprite('block_shoot_right_charge.png'),
+    new Sprite('block_shoot_left_shoot.png'),
+    new Sprite('block_shoot_right_shoot.png')
 ];
 
 TotemBlock.headSprites = [
@@ -151,6 +157,7 @@ TotemBlock.randomType = function() {
 
 TotemBlock.prototype.update = function(supportedLevel) {
     this.timeExisted += 1/FPS;
+    this.sinceActivation += 1/FPS;
     if (this.state == TotemBlock.APPEARING) {
         if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED * 0.5;
@@ -210,8 +217,16 @@ TotemBlock.prototype.render = function(color) {
             whiteSprite = TotemBlock.whiteHeadSprites[color];
             var yOffset = -50;
         } else {
-            mainSprite = TotemBlock.sprites[this.type][color];
-            whiteSprite = TotemBlock.whiteSprites[this.type];
+            var type = this.type;
+            if (this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) {
+                if (this.sinceActivation < 0.5) {
+                    type += 8;
+                } else if (this.canShoot) {
+                    type += 6;
+                }
+            }
+            mainSprite = TotemBlock.sprites[type][color];
+            whiteSprite = TotemBlock.whiteSprites[type];
         }
         
         mainSprite.drawRotated(ctx, this.x, this.y + yOffset, 0);
@@ -281,6 +296,10 @@ TotemBlock.prototype.render = function(color) {
  * @return {Array} array of created objects
  */
 TotemBlock.prototype.activate = function(playerNumber) {
+    if ((this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) && !this.canShoot) {
+        return [];
+    }
+    this.sinceActivation = 0;
     if (this.type === TotemBlock.Type.SHIELD) {
         this.facingLeft = !this.facingLeft;
     }
@@ -289,27 +308,20 @@ TotemBlock.prototype.activate = function(playerNumber) {
             this.state = TotemBlock.FALLING;
             this.velY -= JUMP_SPEED;
         }
-
         if(SOUND_ON) {
             this.swooshSound.play();
         }
-
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
-
         if(SOUND_ON) {
             this.eagleRoar.play();
         }
-
-
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-
         if(SOUND_ON) {
             this.eagleRoar.play();
         }
-
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];

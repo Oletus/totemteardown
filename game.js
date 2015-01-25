@@ -361,9 +361,7 @@ Game.prototype.activateBlock = function(playerNumber) {
                 return;
             }
             var addedObjs = pole.blocks[cursor.block].activate(playerNumber, this.eagleRoar);
-            if (this.activeProjectiles(playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER) {
-                this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
-            }
+            this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
     }
 };
@@ -442,7 +440,8 @@ Game.prototype.update = function() {
 
     for(i = 0; i < this.totemPoles.length; i++) {
         var pole = this.totemPoles[i];
-        pole.update();
+        var canShoot = (this.activeProjectiles(i) < MAX_ACTIVE_PROJECTILES_PER_PLAYER);
+        pole.update(canShoot);
         while (pole.spawnBlocks > 0) {
             this.spawnBlockInPole(i, pole.spawnBlocks);
             pole.spawnBlocks--;
