@@ -24,8 +24,11 @@ var Game = function() {
 
     this.cursors = [];
 
-    this.backgroundMusic = new Audio('prey', true);
-    this.backgroundMusic.play();
+    this.backgroundMusic = new Audio('music', true);
+
+    if(SOUND_ON) {
+        this.backgroundMusic.play();
+    }
 
     this.explosionSound = new Audio('explosion', false);
     this.shieldSound = new Audio('shield', false);
@@ -123,7 +126,11 @@ Game.prototype.spawnNewBlocks = function() {
 
     this.backgroundMusic.volume = 0.01;
     this.thunderSound.volume = 0.3;
-    this.thunderSound.play();
+
+    if(SOUND_ON) {
+        this.thunderSound.play();
+    }
+
     this.backgroundMusic.volume = 1;
 
     ++this.appearPhase;
@@ -275,11 +282,17 @@ Game.prototype.update = function() {
                         }
 
                         if(blocked) {
-                            this.shieldSound.play();
+                            if(SOUND_ON) {
+                                this.shieldSound.play();
+                            }
                         }
 
                         if (!blocked) {
-                            this.explosionSound.play();
+
+                            if(SOUND_ON) {
+                                this.explosionSound.play();
+                            }
+
                             this.totemPoles[j].blocks.splice(k, 1);
                             this.clampAllCursors();
                         }

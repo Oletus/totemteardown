@@ -118,7 +118,9 @@ TotemBlock.prototype.update = function(supportedLevel) {
             this.state = TotemBlock.SUPPORTED;
             this.velY = 0;
 
-            this.woodSound.play();
+            if(SOUND_ON) {
+                this.woodSound.play();
+            }
         }
     }
     
@@ -187,17 +189,25 @@ TotemBlock.prototype.activate = function(playerNumber) {
             this.velY -= JUMP_SPEED;
         }
 
-        this.swooshSound.play();
+        if(SOUND_ON) {
+            this.swooshSound.play();
+        }
+
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
 
-        this.eagleRoar.play();
+        if(SOUND_ON) {
+            this.eagleRoar.play();
+        }
+
 
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
 
-        this.eagleRoar.play();
+        if(SOUND_ON) {
+            this.eagleRoar.play();
+        }
 
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
