@@ -93,8 +93,10 @@ Game.prototype.drawHud = function() {
         {
             ctx.lineWidth = 2;
             ctx.font="italic bold 50px Myriad Pro";
-            ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
-            ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+            if (Math.sin(this.stateTime * 2.0) > 0) {
+                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+            }
         } else {
             ctx.lineWidth = 2;
             ctx.font="italic bold 50px Myriad Pro";
