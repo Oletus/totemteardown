@@ -52,7 +52,7 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.Y, this.showInstructions, this.hideInstructions);
-    addEventListener("keydown", this.debugMode, false);
+    //addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
         Game.longIntroSound.playClone();
@@ -398,7 +398,7 @@ Game.prototype.activateBlock = function(playerNumber) {
 /**
  * @return {boolean} True if the projectile needs to be destroyed.
  */
-Game.prototype.killBlocks = function(killBox) {
+Game.prototype.killBlocks = function(killBox, obj) {
     if (this.state === Game.VICTORY) {
         return true;
     }
@@ -438,14 +438,28 @@ Game.prototype.killBlocks = function(killBox) {
                     }
                 }
 
+                var splashSize = EMISSION_RATE;
                 if (!blocked) {
-
                     if(SOUND_ON) {
                         Game.explosionSound.playClone();
                     }
 
                     this.totemPoles[j].blocks.splice(k, 1);
                     this.clampAllCursors();
+                } else {
+                    splashSize *= 0.3;
+                }
+
+                var z = killBox.left + 50;
+                var v;
+                if(obj.velX > 0) {
+                    v = z - 28;
+                } else {
+                    v = z - 75;
+                }
+                var em = new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2));
+                for (var j = 0; j < splashSize; ++j) {
+                    this.particles.push(em.emitParticle());
                 }
                 return true;
             }
@@ -485,8 +499,6 @@ Game.prototype.update = function() {
         }
     }
 
-    var destroyedBox;
-
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         var obj = this.dynamicObjs[i];
         obj.update();
@@ -494,22 +506,8 @@ Game.prototype.update = function() {
             this.dynamicObjs.splice(i, 1);
         } else {
             var killBox = obj.killBox();
-            if (this.killBlocks(killBox)) {
-                destroyedBox = killBox;
-                var z = killBox.left + 50;
-                var v;
-                if(obj.velX > 0) {
-                    v = z - 28;
-                } else {
-                    v = z - 75;
-                }
-
+            if (this.killBlocks(killBox, obj)) {
                 this.dynamicObjs.splice(i, 1);
-
-                var em = new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2));
-                for (var j = 0; j < EMISSION_RATE; ++j) {
-                    this.particles.push(em.emitParticle());
-                }
             }
         }
     }
@@ -525,8 +523,6 @@ Game.prototype.update = function() {
             }
         }
     }
-
-    //console.log(destroyedBox);
 
     plotParticles(canvas.width, canvas.height);
 };
