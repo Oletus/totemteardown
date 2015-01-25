@@ -50,6 +50,8 @@ var Game = function() {
 
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.DOWN, this.moveCursorDown);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.UP, this.moveCursorUp);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.LEFT, this.cursorLeft);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.RIGHT, this.cursorRight);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
@@ -194,6 +196,30 @@ Game.prototype.moveCursorUp = function(playerNumber) {
         }
         if (!HOLD_TO_SWAP) {
             cursor.selected = false;
+        }
+    }
+};
+
+Game.prototype.cursorLeft = function(playerNumber) {
+    if (CAN_AIM_EAGLES) {
+        var cursor = this.cursorActive(playerNumber);
+        if (this.hasBlock(cursor.pole, cursor.block)) {
+            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            if (block.type === TotemBlock.Type.SHOOTRIGHT) {
+                block.type = TotemBlock.Type.SHOOTLEFT;
+            }
+        }
+    }
+};
+
+Game.prototype.cursorRight = function(playerNumber) {
+    if (CAN_AIM_EAGLES) {
+        var cursor = this.cursorActive(playerNumber);
+        if (this.hasBlock(cursor.pole, cursor.block)) {
+            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            if (block.type === TotemBlock.Type.SHOOTLEFT) {
+                block.type = TotemBlock.Type.SHOOTRIGHT;
+            }
         }
     }
 };
