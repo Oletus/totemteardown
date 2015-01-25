@@ -100,6 +100,9 @@ Game.prototype.cursorActive = function(playerNumber) {
 };
 
 Game.prototype.clampCursor = function(cursor) {
+    if (cursor.pole >= this.totemPoles.length) {
+        return;
+    }
     var blocks = this.totemPoles[cursor.pole].blocks;
     if (cursor.block >= blocks.length) {
         cursor.block = blocks.length - 1;
@@ -195,6 +198,14 @@ Game.prototype.start = function() {
     if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= 2) {
         this.state = Game.START_COUNTDOWN;
         this.stateTime = 0;
+        for (var i = 0; i < this.totemPoles.length;) {
+            var pole = this.totemPoles[i];
+            if (!pole.isInitialized()) {
+                this.totemPoles.splice(i, 1);
+            } else {
+                ++i;
+            }
+        }
     }
 };
 
@@ -286,7 +297,7 @@ Game.prototype.cursorRight = function(playerNumber) {
 };
 
 Game.prototype.hasBlock = function(pole, block) {
-    return this.totemPoles[pole].blocks.length > block;
+    return this.totemPoles.length > pole && this.totemPoles[pole].blocks.length > block;
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
