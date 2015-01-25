@@ -39,7 +39,7 @@ TotemPole.prototype.update = function() {
                 this.blocks[topIndex].state = TotemBlock.FALLING;
             }
             chain = 0;
-            this.spawnBlocks += 2;
+            this.spawnBlocks += BEAVER_SPAWN_BLOCKS;
         }
     }
 };
