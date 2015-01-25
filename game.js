@@ -85,6 +85,7 @@ Game.backgroundMusic = new Audio('music', true);
 Game.explosionSound = new Audio('explosion', false);
 Game.shieldSound = new Audio('shield', false);
 Game.thunderSound = new Audio('thunder', false);
+Game.longIntroSound = new Audio('longintro', false);
 
 Game.xSprite = new Sprite('button_x.png');
 
@@ -462,7 +463,13 @@ Game.prototype.update = function() {
     this.gamepads.update();
 
     this.stateTime += 1/FPS;
+
+    if(this.state === Game.CHOOSE_PLAYERS) {
+        Game.longIntroSound.play();
+    }
+
     if (this.state === Game.PRE_COUNTDOWN) {
+
         if (this.stateTime > PRE_COUNTDOWN_DURATION) {
             this.state = Game.START_COUNTDOWN;
             this.stateTime = 0;
