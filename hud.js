@@ -122,10 +122,10 @@ Game.prototype.drawHud = function() {
                 ctx.textBaseline = 'middle';
 
 
-                ctx.font="italic bold 75px Myriad Pro";
+                ctx.font="italic bold 50px Myriad Pro";
                 ctx.fillStyle = '#ff0000';
-                ctx.fillText('PRESS START!', 0, -225);
-                ctx.strokeText('PRESS START!', 0, -225);
+                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, -225);
+                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, -225);
         }
         else
         {
