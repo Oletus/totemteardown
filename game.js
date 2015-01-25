@@ -52,7 +52,7 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.Y, this.showInstructions, this.hideInstructions);
-    addEventListener("keydown", this.debugMode, false);
+    //addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
         Game.backgroundMusic.play();
