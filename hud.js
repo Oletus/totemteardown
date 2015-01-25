@@ -115,6 +115,19 @@ Game.prototype.drawHud = function() {
     {
         if( count >= 2 )
         {
+                ctx.scale(1.0, 1.0);
+                ctx.fillStyle = '#ff0000';
+                ctx.shadowBlur = 1;
+                ctx.shadowColor = '#000';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.font="italic bold 100px Myriad Pro";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+
+                ctx.font="italic bold 75px Myriad Pro";
+                ctx.fillStyle = '#ff0000';
                 ctx.fillText('PRESS START!', 0, -225);
                 ctx.strokeText('PRESS START!', 0, -225);
         }
