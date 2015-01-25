@@ -19,6 +19,8 @@ Game.prototype.reset = function() {
     this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
 
+    this.instructionsRequested = 0;
+    
     var startPoleX = POLE_DISTANCE_FROM_EDGE,
         startPoleY = GROUND_LEVEL;
 
@@ -49,6 +51,7 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.Y, this.showInstructions, this.hideInstructions);
     addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
@@ -76,12 +79,22 @@ Game.cursorSprites = [
 Game.bg = new Sprite('BackgroundSky.png');
 Game.fg = new Sprite('foreground.png');
 
+Game.instructionsSprite = new Sprite('Instructions.png');
+
 Game.backgroundMusic = new Audio('music', true);
 Game.explosionSound = new Audio('explosion', false);
 Game.shieldSound = new Audio('shield', false);
 Game.thunderSound = new Audio('thunder', false);
 
 Game.xSprite = new Sprite('button_x.png');
+
+Game.prototype.showInstructions = function(playerNumber) {
+    this.instructionsRequested += 1;
+};
+
+Game.prototype.hideInstructions = function(playerNumber) {
+    this.instructionsRequested -= 1;
+};
 
 Game.prototype.debugMode = function(e) {
 
@@ -548,8 +561,10 @@ Game.prototype.render = function() {
     if(game.emitters.length > 0) {
         killEmitter(0);
     }
-
-    ctx.restore();
+    
+    if (this.instructionsRequested > 0 && this.state == Game.CHOOSE_PLAYERS) {
+        Game.instructionsSprite.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height * 0.5, 0);
+    }
 };
 
 var webFrame = function() {
