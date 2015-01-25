@@ -65,10 +65,29 @@ Game.prototype.drawHud = function() {
                 text = "READY!"
             }
         } else {
-            text = "TOTEMS:   " +this.totemPoles[i].blocks.length;
+            text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
         ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
         ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+
+        if (this.state === Game.CHOOSE_PLAYERS) {
+            var ptext = 'P' + (i + 1);
+            var PNy = this.totemPoles[i].blocks[0].y - 130;
+            ctx.save();
+            ctx.translate(0, Math.sin(this.stateTime * 2) * 10);
+            ctx.strokeText(ptext, TotemWinnerX, PNy);
+            ctx.fillText(ptext, TotemWinnerX, PNy);
+            ctx.translate(0, 25);
+            ctx.beginPath();
+            ctx.moveTo(TotemWinnerX, PNy + 10);
+            ctx.lineTo(TotemWinnerX + 10, PNy);
+            ctx.lineTo(TotemWinnerX - 10, PNy);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+        }
+
         TotemWinnerX += POLE_DISTANCE;
         TotemBarX += POLE_DISTANCE;
     }
