@@ -76,7 +76,7 @@ Game.cursorSprites = [
     new Sprite('cursor3.png')
 ];
 
-Game.bg = new Sprite('BackgroundSky.png');
+Game.bg = new Sprite('BackgroundSky.jpg');
 Game.fg = new Sprite('foreground.png');
 
 Game.instructionsSprite = new Sprite('Instructions.png');
