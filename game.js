@@ -8,6 +8,7 @@ var Game = function() {
     this.f = 0;
     
     this.bg = new Sprite('BackgroundSky.png');
+    this.fg = new Sprite('foreground.png');
 
     this.totemPoles = [];
     this.dynamicObjs = [];
@@ -342,6 +343,8 @@ Game.prototype.render = function() {
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         this.dynamicObjs[i].render();
     }
+    
+    this.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + this.fg.height * 0.2, 0, ctx.canvas.width / this.fg.width);
 
     ctx.font = '100px sans-serif';
     ctx.textAlign = 'center';
