@@ -355,8 +355,10 @@ Game.prototype.update = function() {
 
 Game.prototype.render = function() {
     var i;
-    this.bg.fillCanvasFitBottom(ctx);
-    
+    //this.bg.fillCanvasFitBottom(ctx);
+    this.bg.fillCanvas(ctx);
+    //this.bg.draw(ctx, 0, 0);
+
     var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
     ctx.fillStyle = '#f80';
     ctx.fillRect(0, victoryLineHeight, ctx.canvas.width, 2);
@@ -439,14 +441,47 @@ var webFrame = function() {
 
 
 var initGame = function() {
-    canvas = document.createElement('canvas');
-    canvas.width = SCREEN_WIDTH;
-    canvas.height = 700;
-    document.body.appendChild(canvas);
+    canvas = document.getElementById('totemGame');
+
+    resizeGame();
+
     ctx = canvas.getContext('2d');
+
+    ctx.canvas.width = window.innerWidth;
+
+    ctx.canvas.height = window.innerHeight;
 
     game = new Game();
     
     nextFrameTime = new Date().getTime() - 1000 / FPS * 0.5;
     webFrame();
 };
+
+var resizeGame = function() {
+    var gameArea = document.getElementById('gameArea');
+    var widthToHeight = 4 / 3;
+    var newWidth = window.innerWidth;
+    var newHeight = window.innerHeight;
+    var newWidthToHeight = newWidth / newHeight;
+
+    if (newWidthToHeight > widthToHeight) {
+        newWidth = newHeight * widthToHeight;
+        gameArea.style.height = newHeight + 'px';
+        gameArea.style.width = newWidth + 'px';
+    } else {
+        newHeight = newWidth / widthToHeight;
+        gameArea.style.width = newWidth + 'px';
+        gameArea.style.height = newHeight + 'px';
+    }
+
+    gameArea.style.marginTop = (-newHeight / 2) + 'px';
+    gameArea.style.marginLeft = (-newWidth / 2) + 'px';
+
+    var gameCanvas = document.getElementById('totemGame');
+    gameCanvas.width = newWidth;
+    gameCanvas.height = newHeight;
+
+    GROUND_LEVEL = newHeight - 145;
+};
+
+window.addEventListener('resize', resizeGame, false);

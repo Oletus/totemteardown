@@ -11,7 +11,6 @@ SCREEN_WIDTH = 1100;
 STARTING_BLOCKS = 8;
 BLOCK_HEIGHT = 50;
 
-
 DEBUG_MODE = false;
 
 GROUND_LEVEL = 650; // canvas pixels
