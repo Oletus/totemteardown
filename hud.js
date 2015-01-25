@@ -52,11 +52,13 @@ Game.prototype.drawHud = function() {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
 
-        Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
-        ctx.fillStyle = guiColors[i];
-        ctx.textAlign="center";
-        ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
-        ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+        if (text !== '') {
+            Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
+            ctx.fillStyle = guiColors[i];
+            ctx.textAlign="center";
+            ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
+            ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+        }
 
         if (this.state === Game.CHOOSE_PLAYERS) {
             var ptext = 'P' + (i + 1);

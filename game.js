@@ -337,7 +337,7 @@ Game.prototype.hasBlock = function(pole, block) {
 
 Game.prototype.selectBlock = function(playerNumber) {
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.stateTime += 0.5;
+        this.stateTime += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -375,7 +375,7 @@ Game.prototype.activateBlock = function(playerNumber) {
         return;
     }
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.stateTime += 0.5;
+        this.stateTime += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
