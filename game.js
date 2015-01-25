@@ -480,11 +480,15 @@ Game.prototype.update = function() {
         } else {
             var killBox = obj.killBox();
             if (this.killBlocks(killBox)) {
-                destroyedBox = obj;
-                var z = obj.x + 50;
-                var v = z - 25;
-                console.log(z);
-                console.log(v);
+                destroyedBox = killBox;
+                var z = killBox.left + 50;
+                var v;
+                if(obj.velX > 0) {
+                    v = z - 28;
+                } else {
+                    v = z - 75;
+                }
+
                 game.emitters.push(new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2)));
                 //game.fields.push(new Field(new Vector(obj.x - 25, obj.y)), 1540);
                 //game.fields[0].position.x = obj.x - 25;
@@ -657,7 +661,7 @@ var plotParticles = function(boundsX, boundsY) {
 
 var drawParticles = function() {
 
-    ctx.fillStyle = 'rgb(125,47,12)';
+    ctx.fillStyle = 'rgb(255,255,255)';
     for (var i = 0; i < game.particles.length; i++) {
         var position = game.particles[i].position;
         ctx.fillRect(position.x, position.y, PARTICLE_SIZE, PARTICLE_SIZE);
