@@ -167,7 +167,7 @@ Game.prototype.spawnNewBlocks = function() {
         var pole = this.totemPoles[i];
         var lastBlock = pole.blocks[pole.blocks.length - 1];
         if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state == TotemBlock.APPEARING) {
-            this.winnersText.push('player ' + (i + 1));
+            this.winnersText.push('P' + (i + 1));
             if (this.state != Game.VICTORY) {
                 this.state = Game.VICTORY;
                 this.stateTime = 0;
@@ -175,7 +175,7 @@ Game.prototype.spawnNewBlocks = function() {
         }
     }
     if (this.state === Game.VICTORY) {
-        this.winnersText = 'Congrats, ' + this.winnersText.join(', ') + '!';
+        this.winnersText = 'CONGRATS, ' + this.winnersText.join(', ') + '!';
     }
 
     Game.backgroundMusic.volume = 0.01;

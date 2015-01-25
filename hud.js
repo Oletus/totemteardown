@@ -104,7 +104,6 @@ Game.prototype.drawHud = function() {
             ctx.strokeText('TAKEDOWN!', 0, 0);
         }
     } else if (this.state === Game.VICTORY) {
-        ctx.scale(0.75, 0.75);
         ctx.fillText(this.winnersText, 0, 0);
         ctx.strokeText(this.winnersText, 0, 0);
     }
