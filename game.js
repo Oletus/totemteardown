@@ -396,11 +396,14 @@ Game.prototype.update = function() {
             var killBox = obj.killBox();
             if (this.killBlocks(killBox)) {
                 destroyedBox = obj;
-                game.emitters.push(new Emitter(new Vector(obj.x - 25, obj.y - 25), Vector.fromAngle(0, 2)));
+                var z = obj.x + 50;
+                var v = z - 25;
+                console.log(z);
+                console.log(v);
+                game.emitters.push(new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2)));
                 //game.fields.push(new Field(new Vector(obj.x - 25, obj.y)), 1540);
-                game.fields[0].position.x = obj.x - 25;
-                game.fields[0].position.x = obj.y - 10;
-                console.log('update');
+                //game.fields[0].position.x = obj.x - 25;
+                //game.fields[0].position.x = obj.y - 10;
                 this.dynamicObjs.splice(i, 1);
             }
         }
@@ -416,7 +419,7 @@ Game.prototype.update = function() {
         }
     }
 
-    console.log(destroyedBox);
+    //console.log(destroyedBox);
 
     addNewParticles();
     plotParticles(canvas.width, canvas.height);
@@ -571,7 +574,6 @@ var resizeGame = function() {
 window.addEventListener('resize', resizeGame, false);
 
 var addNewParticles = function() {
-    console.log('addParticles');
     if (game.particles.length > MAX_PARTICLES) return;
 
     for (var i = 0; i < game.emitters.length; i++) {
@@ -590,17 +592,20 @@ var plotParticles = function(boundsX, boundsY) {
 
         if (pos.x < 0 || pos.x > boundsX || pos.y < 0 || pos.y > boundsY) continue;
 
-        particle.submitToFields(game.fields);
+        //particle.submitToFields(game.fields);
 
         particle.move();
 
         currentParticles.push(particle);
     }
 
-    game.particles = currentParticles;
+    //game.particles = currentParticles;
 };
 
 var drawParticles = function() {
+
+    console.log('here');
+
     ctx.fillStyle = 'rgb(125,47,12)';
     for (var i = 0; i < game.particles.length; i++) {
         var position = game.particles[i].position;
@@ -614,5 +619,5 @@ var killEmitter = function() {
         game.particles = [];
         game.fields = [];
 
-    }, 200);
+    }, 1000);
 };
