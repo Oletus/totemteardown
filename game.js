@@ -55,6 +55,7 @@ Game.prototype.reset = function() {
     //addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
+        Game.longIntroSound.playClone();
         Game.backgroundMusic.play();
     }
     
@@ -473,10 +474,6 @@ Game.prototype.update = function() {
     this.gamepads.update();
 
     this.stateTime += 1/FPS;
-
-    if(this.state === Game.CHOOSE_PLAYERS) {
-        Game.longIntroSound.play();
-    }
 
     if (this.state === Game.PRE_COUNTDOWN) {
 
