@@ -11,7 +11,7 @@ GGJ 2015 game
 ### Details
 Each animal piece in the totem has an ability.
 
-Breakdown of abilities:
+### Breakdown of abilities:
 ----------------------------------------------
 *Eagle* - Fire an arrow at other totems to remove pieces from others.  Use x to fire arrow.
 
