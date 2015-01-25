@@ -507,7 +507,7 @@ Game.prototype.render = function() {
         this.dynamicObjs[i].render();
     }
     
-    Game.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + Game.fg.height * 0.2, 0, ctx.canvas.width / Game.fg.width);
+    Game.fg.draw(ctx, 0, GROUND_LEVEL - Game.fg.height * 0.15);
 
     if(game.emitters.length > 0) {
         drawParticles();
@@ -518,6 +518,7 @@ Game.prototype.render = function() {
     ctx.textBaseline = 'middle';
     ctx.save();
     ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.2);
+    ctx.scale(ctx.canvas.width / 1200, ctx.canvas.width / 1200);
     ctx.fillStyle = '#000';
     ctx.shadowBlur = 5;
     ctx.shadowColor = '#fff';
