@@ -3,7 +3,8 @@ var TotemPole = function(options) {
         x: 0,
         y: 0,
         blocks: [],
-        color: 0
+        color: 0,
+        spawnBlocks: 0
     };
 
     for(var key in defaults) {
@@ -18,12 +19,27 @@ var TotemPole = function(options) {
 TotemPole.prototype.update = function() {
     // Iterate blocks from bottom to top
     var supportedLevel = this.y - BLOCK_HEIGHT * 0.5;
+    var chain = 0;
     for (var i = this.blocks.length - 1; i >= 0; --i) {
         this.blocks[i].update(supportedLevel);
         if (this.blocks[i].state != TotemBlock.SWAPPING) {
             supportedLevel = this.blocks[i].y - BLOCK_HEIGHT;
         } else {
             supportedLevel -= BLOCK_HEIGHT;
+        }
+        if (this.blocks[i].type === TotemBlock.Type.EMPTY && this.blocks[i].state == TotemBlock.SUPPORTED) {
+            chain++;
+        } else {
+            chain = 0;
+        }
+        if (chain == 2 && MATCH_THREE_EMPTY) {
+            this.blocks.splice(i, 1);
+            topIndex = i - 1;
+            if (topIndex >= 0 && this.blocks[topIndex].state != TotemBlock.SWAPPING) {
+                this.blocks[topIndex].state = TotemBlock.FALLING;
+            }
+            chain = 0;
+            this.spawnBlocks += 2;
         }
     }
 };
