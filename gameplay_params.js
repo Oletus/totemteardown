@@ -45,4 +45,4 @@ START_COUNTDOWN_DURATION = 3; // seconds
 
 SOUND_ON = false;
 
-TINTING_AMOUNT = 0.3; // from 0 to 1
+TINTING_AMOUNT = 0.22; // from 0 to 1
