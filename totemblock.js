@@ -126,7 +126,7 @@ var loadSprites = function() {
 
 loadSprites();
 
-TotemBlock.typeFromChar = function(char) {
+TotemBlock.typeFromChar = function(char, leftWingAdvantage) {
     if (char == 'L') {
         return TotemBlock.Type.SHOOTLEFT;
     }
@@ -143,6 +143,12 @@ TotemBlock.typeFromChar = function(char) {
         return TotemBlock.Type.JUMP;
     }
     if (char == 'S') {
+        if (leftWingAdvantage > 0) {
+            return TotemBlock.Type.SHOOTRIGHT;
+        }
+        if (leftWingAdvantage < 0) {
+            return TotemBlock.Type.SHOOTLEFT;
+        }
         return Math.random() > 0.5 ? TotemBlock.Type.SHOOTLEFT : TotemBlock.Type.SHOOTRIGHT;
     }
 };

@@ -128,8 +128,10 @@ Game.prototype.clampAllCursors = function() {
 
 Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
     var decided = false;
+    var leftWing = pole.blockCount(TotemBlock.Type.SHOOTLEFT);
+    var rightWing = pole.blockCount(TotemBlock.Type.SHOOTRIGHT);
     while (!decided) {
-        var type = TotemBlock.typeFromChar(types[tryIndex % types.length]);
+        var type = TotemBlock.typeFromChar(types[tryIndex % types.length], leftWing - rightWing);
         decided = true;
         if (AVOID_CREATING_OVERREPRESENTED_BLOCKS) {
             if (pole.blocks.length > 0 && pole.blockCount(type) >= pole.blocks.length * 0.49) {
