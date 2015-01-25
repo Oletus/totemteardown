@@ -132,6 +132,13 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex);
         pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+
+
+        game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
+        game.fields.push(new Field(new Vector(this.totemPoles[i].x, GROUND_LEVEL)), 1540);
+
+        addNewParticles();
+        plotParticles(canvas.width, canvas.height);
     }
 };
 
@@ -360,7 +367,7 @@ Game.prototype.killBlocks = function(killBox) {
 Game.prototype.update = function() {
     var i;
     this.gamepads.update();
-   
+
     this.stateTime += 1/FPS;
     if (this.state === Game.START_COUNTDOWN) {
         if (this.stateTime > START_COUNTDOWN_DURATION) {
@@ -368,7 +375,7 @@ Game.prototype.update = function() {
             this.stateTime = 0;
         }
     }
-   
+
     for(i = 0; i < this.totemPoles.length; i++) {
         var pole = this.totemPoles[i];
         pole.update();
@@ -377,7 +384,7 @@ Game.prototype.update = function() {
             pole.spawnBlocks--;
         }
     }
-   
+
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         var obj = this.dynamicObjs[i];
         obj.update();
@@ -386,11 +393,13 @@ Game.prototype.update = function() {
         } else {
             var killBox = obj.killBox();
             if (this.killBlocks(killBox)) {
+                game.emitters.push(new Emitter(new Vector(obj.x - 25, obj.y - 25), Vector.fromAngle(0, 2)));
+                game.fields.push(new Field(new Vector(obj.x - 25, obj.y)), 1540);
                 this.dynamicObjs.splice(i, 1);
             }
         }
     }
-    
+
     this.blockAppearTimer += 1/FPS;
     if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval && this.state == Game.PLAYING) {
         this.blockAppearTimer = 0;
@@ -400,6 +409,9 @@ Game.prototype.update = function() {
             this.blockAppearInterval = BLOCK_APPEAR_INTERVAL_MIN;
         }
     }
+
+    addNewParticles();
+    plotParticles(canvas.width, canvas.height);
 };
 
 Game.prototype.render = function() {
@@ -442,6 +454,10 @@ Game.prototype.render = function() {
     
     Game.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + Game.fg.height * 0.2, 0, ctx.canvas.width / Game.fg.width);
 
+    if(game.emitters.length > 0) {
+        drawParticles();
+    }
+
     ctx.font = '100px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -469,6 +485,11 @@ Game.prototype.render = function() {
         ctx.shadowColor = '#fff';
         ctx.fillText(this.winnersText, 0, 0);
     }
+
+    if(game.emitters.length > 0) {
+        killEmitter(0);
+    }
+
     ctx.restore();
 };
 
@@ -501,12 +522,15 @@ var initGame = function() {
 
     ctx = canvas.getContext('2d');
 
-    //ctx.canvas.width = window.innerWidth;
-
-    //ctx.canvas.height = window.innerHeight;
-
     game = new Game();
-    
+
+    game.midX = ctx.canvas.width / 2;
+    game.midY = ctx.canvas.height / 2;
+
+    game.emitters = [];
+    game.particles = [];
+    game.fields = [];
+
     nextFrameTime = new Date().getTime() - 1000 / FPS * 0.5;
     webFrame();
 };
@@ -537,3 +561,49 @@ var resizeGame = function() {
 };
 
 window.addEventListener('resize', resizeGame, false);
+
+function addNewParticles() {
+    if (game.particles.length > MAX_PARTICLES) return;
+
+    for (var i = 0; i < game.emitters.length; i++) {
+        for (var j = 0; j < EMISSION_RATE; j++) {
+            game.particles.push(game.emitters[i].emitParticle());
+        }
+    }
+}
+
+function plotParticles(boundsX, boundsY) {
+    var currentParticles = [];
+
+    for (var i = 0; i < game.particles.length; i++) {
+        var particle = game.particles[i];
+        var pos = particle.position;
+
+        if (pos.x < 0 || pos.x > boundsX || pos.y < 0 || pos.y > boundsY) continue;
+
+        particle.submitToFields(game.fields[0]);
+
+        particle.move();
+
+        currentParticles.push(particle);
+    }
+
+    particles = currentParticles;
+}
+
+function drawParticles() {
+    ctx.fillStyle = 'rgb(125,47,12)';
+    for (var i = 0; i < game.particles.length; i++) {
+        var position = game.particles[i].position;
+        ctx.fillRect(position.x, position.y, PARTICLE_SIZE, PARTICLE_SIZE);
+    }
+}
+
+function killEmitter() {
+    setTimeout(function() {
+        game.emitters = [];
+        game.particles = [];
+        game.fields = [];
+
+    }, 200);
+}
