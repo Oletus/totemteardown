@@ -538,7 +538,7 @@ var initGame = function() {
 
 var resizeGame = function() {
     var gameArea = document.getElementById('gameArea');
-    var widthToHeight = 4 / 3;
+    var widthToHeight = 3 / 2;
     var newWidth = window.innerWidth;
     var newHeight = window.innerHeight;
     var newWidthToHeight = newWidth / newHeight;
@@ -557,8 +557,8 @@ var resizeGame = function() {
     gameArea.style.marginLeft = (-newWidth / 2) + 'px';
 
     var gameCanvas = document.getElementById('totemGame');
-    gameCanvas.width = newWidth;
-    gameCanvas.height = newHeight;
+    gameCanvas.width = SCREEN_WIDTH;
+    gameCanvas.height = SCREEN_HEIGHT;
 };
 
 window.addEventListener('resize', resizeGame, false);
