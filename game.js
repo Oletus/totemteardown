@@ -5,31 +5,29 @@ var ctx;
 var game;
 
 var Game = function() {
+    this.reset();
+};
+
+Game.prototype.reset = function() {
     this.totemPoles = [];
     this.dynamicObjs = [];
-    
+
     this.stateTime = 0;
     this.state = Game.START_COUNTDOWN;
-    
-    this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
+
+    this.blockAppearInterval = BLOCK_APPEAR_INTERVAL;
+    this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
+    
+    this.cursors = [];
+    while (this.cursors.length < POLE_COUNT) {
+        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
+    }
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
         startPoleY = GROUND_LEVEL;
 
-    this.cursors = [];
-
-    this.backgroundMusic = new Audio('music', true);
-
-    if(SOUND_ON) {
-        this.backgroundMusic.play();
-    }
-
-    this.explosionSound = new Audio('explosion', false);
-    this.shieldSound = new Audio('shield', false);
-    this.thunderSound = new Audio('thunder', false);
-
-    for(var i = 0; i < 4; i++) {
+    for(var i = 0; i < POLE_COUNT; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
@@ -50,6 +48,10 @@ var Game = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
+
+    if(SOUND_ON) {
+        Game.backgroundMusic.play();
+    }
 };
 
 Game.START_COUNTDOWN = 0;
@@ -64,6 +66,11 @@ Game.cursorSprites = [
 
 Game.bg = new Sprite('BackgroundSky.png');
 Game.fg = new Sprite('foreground.png');
+
+Game.backgroundMusic = new Audio('music', true);
+Game.explosionSound = new Audio('explosion', false);
+Game.shieldSound = new Audio('shield', false);
+Game.thunderSound = new Audio('thunder', false);
 
 Game.prototype.debugMode = function(e) {
 
@@ -83,9 +90,6 @@ Game.prototype.debugMode = function(e) {
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
-    while (this.cursors.length <= playerNumber) {
-        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
-    }
     return this.cursors[playerNumber];
 };
 
@@ -134,14 +138,14 @@ Game.prototype.spawnNewBlocks = function() {
     }
 
 
-    this.backgroundMusic.volume = 0.01;
-    this.thunderSound.volume = 0.3;
+    Game.backgroundMusic.volume = 0.01;
+    Game.thunderSound.volume = 0.3;
 
     if(SOUND_ON) {
-        this.thunderSound.play();
+        Game.thunderSound.playClone();
     }
 
-    this.backgroundMusic.volume = 1;
+    Game.backgroundMusic.volume = 1;
 
     ++this.appearPhase;
 };
@@ -303,14 +307,14 @@ Game.prototype.killBlocks = function(killBox) {
                         }
                     }
                     if(blocked && SOUND_ON) {
-                        this.shieldSound.play();
+                        Game.shieldSound.playClone();
                     }
                 }
 
                 if (!blocked) {
 
                     if(SOUND_ON) {
-                        this.explosionSound.play();
+                        Game.explosionSound.playClone();
                     }
 
                     this.totemPoles[j].blocks.splice(k, 1);
@@ -359,12 +363,12 @@ Game.prototype.update = function() {
     }
     
     this.blockAppearTimer += 1/FPS;
-    if (BLOCK_APPEAR_INTERVAL > 0 && this.blockAppearTimer > BLOCK_APPEAR_INTERVAL) {
+    if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval) {
         this.blockAppearTimer = 0;
         this.spawnNewBlocks();
-        BLOCK_APPEAR_INTERVAL -= BLOCK_APPEAR_INTERVAL_REDUCE;
-        if (BLOCK_APPEAR_INTERVAL < BLOCK_APPEAR_INTERVAL_MIN) {
-            BLOCK_APPEAR_INTERVAL = BLOCK_APPEAR_INTERVAL_MIN;
+        this.blockAppearInterval -= BLOCK_APPEAR_INTERVAL_REDUCE;
+        if (this.blockAppearInterval < BLOCK_APPEAR_INTERVAL_MIN) {
+            this.blockAppearInterval = BLOCK_APPEAR_INTERVAL_MIN;
         }
     }
 };
