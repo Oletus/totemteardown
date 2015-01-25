@@ -106,8 +106,8 @@ Game.prototype.clampAllCursors = function() {
     }
 };
 
-Game.prototype.getBlockTypeForPole = function(pole, types) {
-    var tryIndex = this.appearPhase;
+Game.prototype.getBlockTypeForPole = function(pole, types, appearPhase) {
+    var tryIndex = appearPhase;
     var decided = false;
     while (!decided) {    
         var type = TotemBlock.typeFromChar(types[tryIndex % types.length]);
@@ -122,14 +122,18 @@ Game.prototype.getBlockTypeForPole = function(pole, types) {
     return type;
 };
 
+Game.prototype.spawnBlockInPole = function(i, appearPhase) {
+    var pole = this.totemPoles[i];
+    if (pole.blocks.length <= VICTORY_BLOCKS) {
+        var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
+        var type = this.getBlockTypeForPole(pole, types, appearPhase);
+        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+    }
+};
+
 Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
-        var pole = this.totemPoles[i];
-        if (pole.blocks.length <= VICTORY_BLOCKS) {
-            var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
-            var type = this.getBlockTypeForPole(pole, types);
-            pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
-        }
+        this.spawnBlockInPole(i, this.appearPhase);
     }
 
 
@@ -283,9 +287,14 @@ Game.prototype.update = function() {
         }
     }
    
-   for(i = 0; i < this.totemPoles.length; i++) {
-       this.totemPoles[i].update();
-   }
+    for(i = 0; i < this.totemPoles.length; i++) {
+        var pole = this.totemPoles[i];
+        pole.update();
+        while (pole.spawnBlocks > 0) {
+            this.spawnBlockInPole(i, pole.spawnBlocks);
+            pole.spawnBlocks--;
+        }
+    }
    
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         var obj = this.dynamicObjs[i];

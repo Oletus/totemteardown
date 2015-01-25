@@ -26,17 +26,21 @@ HOLD_TO_SWAP = true;
 
 STARTING_TYPES = [
     'LBEJBBRJEB',
+    'LBEJBBRJEB',
     'BREJBLBJEB'
 ];
 
 APPEAR_TYPES = [
-    'SBJ',
-    'BSJ'
+    'SBJE',
+    'BSJE'
 ];
 
 AVOID_CREATING_OVERREPRESENTED_BLOCKS = true;
 
+
 CAN_AIM_EAGLES = true;
+
+MATCH_THREE_EMPTY = true;
 
 SHIELD_HITPOINTS = 3; // Set to -1 for invulnerable
 
@@ -52,4 +56,5 @@ SOUND_ON = false;
 TINTING_AMOUNT = 0; // from 0 to 1
 
 CURSOR_WIDTH = 52;
+
 CURSOR_HEIGHT = 52;
