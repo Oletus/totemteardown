@@ -4,7 +4,8 @@ var TotemPole = function(options) {
         y: 0,
         blocks: [],
         color: 0,
-        spawnBlocks: 0
+        spawnBlocks: 0,
+        ready: false
     };
 
     for(var key in defaults) {

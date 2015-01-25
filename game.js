@@ -12,8 +12,7 @@ Game.prototype.reset = function() {
     this.totemPoles = [];
     this.dynamicObjs = [];
 
-    this.stateTime = 0;
-    this.state = Game.START_COUNTDOWN;
+    this.state = Game.PRESTART;
 
     this.blockAppearInterval = BLOCK_APPEAR_INTERVAL;
     this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
@@ -47,6 +46,7 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.RIGHT, this.cursorRight);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.setReady);
     addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
@@ -56,9 +56,10 @@ Game.prototype.reset = function() {
     this.winnersText = undefined;
 };
 
-Game.START_COUNTDOWN = 0;
-Game.PLAYING = 1;
-Game.VICTORY = 2;
+Game.PRESTART = 0;
+Game.START_COUNTDOWN = 1;
+Game.PLAYING = 2;
+Game.VICTORY = 3;
 
 Game.cursorSprites = [
     new Sprite('cursor0.png'),
@@ -109,6 +110,10 @@ Game.prototype.clampAllCursors = function() {
     for (var i = 0; i < this.cursors.length; ++i) {
         this.clampCursor(this.cursors[i]);
     }
+};
+
+Game.prototype.setReady = function(playerNumber) {
+    this.totemPoles[playerNumber].ready = true;
 };
 
 Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
@@ -369,6 +374,23 @@ Game.prototype.update = function() {
     this.gamepads.update();
 
     this.stateTime += 1/FPS;
+
+    if(this.state === Game.PRESTART) {
+
+        var allReady = true;
+
+        for(var i = 0; i < this.totemPoles.length; i++) {
+            if(!this.totemPoles[i].ready) {
+                allReady = false;
+            }
+        }
+
+        if(allReady) {
+            this.state = Game.START_COUNTDOWN;
+            this.stateTime = 0;
+        }
+    }
+
     if (this.state === Game.START_COUNTDOWN) {
         if (this.stateTime > START_COUNTDOWN_DURATION) {
             this.state = Game.PLAYING;
@@ -464,7 +486,10 @@ Game.prototype.render = function() {
     ctx.save();
     ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.2);
     ctx.fillStyle = '#000';
-    if (this.state === Game.START_COUNTDOWN) {
+
+    if (this.state === Game.PRESTART) {
+        ctx.fillText("Press A to start", 0, 0);
+    } else if (this.state === Game.START_COUNTDOWN) {
         var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
         var currentNumberTime = mathUtil.fmod(numTime, 1.0);
         var num = 3 - Math.floor(numTime);
