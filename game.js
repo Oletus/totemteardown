@@ -202,6 +202,12 @@ Game.prototype.spawnNewBlocks = function() {
 };
 
 Game.prototype.start = function() {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
+    }
     var activePlayers = 0;
     for (var i = 0; i < this.totemPoles.length; ++i) {
         if (this.totemPoles[i].isInitialized()) {
@@ -315,10 +321,8 @@ Game.prototype.hasBlock = function(pole, block) {
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
-    if (this.state === Game.VICTORY) {
-        if (this.stateTime > MIN_VICTORY_TIME) {
-            this.reset();
-        }
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.stateTime += 0.5;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -356,6 +360,7 @@ Game.prototype.activateBlock = function(playerNumber) {
         return;
     }
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.stateTime += 0.5;
         return;
     }
     var cursor = this.cursorActive(playerNumber);

@@ -139,8 +139,14 @@ Game.prototype.drawHud = function() {
             ctx.strokeText('TAKEDOWN!', 0, 0);
         }
     } else if (this.state === Game.VICTORY) {
-        ctx.fillText(this.winnersText, 0, 0);
-        ctx.strokeText(this.winnersText, 0, 0);
+        ctx.fillText(this.winnersText, 0, -50);
+        ctx.strokeText(this.winnersText, 0, -50);
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            if (Math.sin(this.stateTime * 2.0) > 0) {
+                ctx.fillText('PRESS START TO RESET', 0, 50);
+                ctx.strokeText('PRESS START TO RESET', 0, 50);
+            }
+        }
     }
     ctx.restore();
 };
