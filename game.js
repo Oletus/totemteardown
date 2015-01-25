@@ -134,7 +134,7 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
         pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
 
 
-        game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(0, 2)));
+        game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
         game.fields.push(new Field(new Vector(this.totemPoles[i].x, GROUND_LEVEL)), 1540);
 
         addNewParticles();
@@ -605,5 +605,5 @@ function killEmitter() {
         game.particles = [];
         game.fields = [];
 
-    }, 150);
+    }, 200);
 }
