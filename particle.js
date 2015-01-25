@@ -15,14 +15,16 @@ Particle.prototype.submitToFields = function (fields) {
     var totalAccelerationY = 0;
 
     // for each passed field
+
     for (var i = 0; i < fields.length; i++) {
         var field = fields[i];
+        console.log('particle');
 
         // find the distance between the particle and the field
         var vectorX = field.position.x - this.position.x;
         var vectorY = field.position.y - this.position.y;
 
-        var force = field.mass / Math.pow(vectorX*vectorX+vectorY*vectorY,1.5);
+        var force = field.mass / Math.pow(vectorX * vectorX + vectorY * vectorY, 1.5);
 
         // add to the total acceleration the force adjusted by distance
         totalAccelerationX += vectorX * force;
