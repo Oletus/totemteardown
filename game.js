@@ -58,6 +58,13 @@ var Game = function() {
 Game.START_COUNTDOWN = 0;
 Game.PLAYING = 1;
 
+Game.cursorSprites = [
+    new Sprite('cursor0.png'),
+    new Sprite('cursor1.png'),
+    new Sprite('cursor2.png'),
+    new Sprite('cursor3.png')
+];
+
 Game.prototype.debugMode = function(e) {
 
 
@@ -328,15 +335,22 @@ Game.prototype.render = function() {
 
     for (i = 0; i < this.cursors.length; ++i) {
         var cursor = this.cursors[i];
-        if(cursor.selected) {
-            ctx.strokeStyle = '#FFFF00';
-        } else {
-            ctx.strokeStyle = '#00FF00';    
-        }
-        ctx.lineWidth = 5;
         if (this.hasBlock(cursor.pole, cursor.block)) {
             var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
+
+            /*ctx.strokeStyle = TotemBlock.totemPoleColors[i];
+            ctx.lineWidth = 6;
             canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
+
+            ctx.strokeStyle = '#fff';
+            if (cursor.selected) {
+                ctx.lineWidth = 4;
+            } else {
+                ctx.lineWidth = 2;
+            }
+            
+            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);*/
         }
     }
     
