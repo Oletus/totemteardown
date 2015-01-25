@@ -2,19 +2,18 @@ SWAP_SPEED = 4;
 FALL_ACCELERATION = 0.2;
 FALL_SPEED = 5;
 JUMP_SPEED = 7;
-SHOT_SPEED = 3;
+SHOT_SPEED = 3.5;
 
 POLE_COUNT = 4;
 POLE_DISTANCE = 240;
 SCREEN_WIDTH = 1100;
 
-STARTING_BLOCKS = 8;
+STARTING_BLOCKS = 6;
 BLOCK_HEIGHT = 50;
-
 
 DEBUG_MODE = false;
 
-GROUND_LEVEL = 650; // canvas pixels
+GROUND_LEVEL = 720; // canvas pixels
 
 VICTORY_BLOCKS = 12;
 
@@ -45,7 +44,7 @@ MATCH_THREE_EMPTY = true;
 SHIELD_HITPOINTS = 3; // Set to -1 for invulnerable
 
 FIRST_BLOCK_APPEAR = 15; // seconds
-BLOCK_APPEAR_INTERVAL = 13; // seconds
+BLOCK_APPEAR_INTERVAL = 6; // seconds
 BLOCK_APPEAR_INTERVAL_REDUCE = 1; // seconds, each block appearing reduces the interval with this value
 BLOCK_APPEAR_INTERVAL_MIN = 4; // seconds
 
@@ -59,3 +58,5 @@ TINTING_AMOUNT = 0; // from 0 to 1
 CURSOR_WIDTH = 52;
 
 CURSOR_HEIGHT = 52;
+
+BEAVER_SPAWN_BLOCKS = 4;
