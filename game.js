@@ -48,10 +48,10 @@ var Game = function() {
 
     this.gamepads = new Gamepads(this);
 
-    this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
-    this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
-    this.gamepads.addButtonChangeListener(0, this.selectBlock, this.deselectBlock);
-    this.gamepads.addButtonChangeListener(2, this.activateBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.DOWN, this.moveCursorDown);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.UP, this.moveCursorUp);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
 };
 

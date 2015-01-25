@@ -65,3 +65,22 @@ Gamepads.prototype.update = function() {
 Gamepads.prototype.addButtonChangeListener = function(buttonNumber, callbackDown, callbackUp) {
     this.downListeners.push({buttonNumber: buttonNumber, callback: callbackDown, callbackUp: callbackUp, isDown: [false, false, false, false]});
 };
+
+Gamepads.BUTTONS = {
+  A: 0, // Face (main) buttons
+  B: 1,
+  X: 2,
+  Y: 3,
+  L1: 4, // Top shoulder buttons
+  R1: 5,
+  L2: 6, // Bottom shoulder buttons
+  R2: 7,
+  SELECT: 8,
+  START: 9,
+  LEFT_STICK: 10, // Analogue sticks (if depressible)
+  RIGHT_STICK: 11,
+  UP: 12, // Directional (discrete) pad
+  DOWN: 13,
+  LEFT: 14,
+  RIGHT: 15
+};
