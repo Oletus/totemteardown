@@ -23,12 +23,12 @@ Game.prototype.drawHud = function() {
     ctx.textAlign="left";
 
     var TotemWinnerX = POLE_DISTANCE_FROM_EDGE;
-    var TotemWinnerY = 757.5;
+    var TotemWinnerY = 761;
 
     var TotemBarX = TotemWinnerX - 125;
     var TotemBarY = 733.5;
+    var count = 0;
 
-    //draw text
 
     for(var i = 0; i < this.totemPoles.length; i++) {
         Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
@@ -62,7 +62,12 @@ Game.prototype.drawHud = function() {
                     text = "HOLD A";
                 }
             } else {
+                count += 1
                 text = "READY!"
+            }
+            if( this.totemPoles[i].isInitialized() >= 2 )
+            {
+                text = "PRESS START!"
             }
         } else {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
@@ -106,6 +111,23 @@ Game.prototype.drawHud = function() {
     ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.35);
     ctx.scale(ctx.canvas.width / 1200, ctx.canvas.width / 1200);
 
+    if (this.state === Game.CHOOSE_PLAYERS)
+    {
+        if( count >= 2 )
+        {
+                ctx.fillText('PRESS START!', 0, -225);
+                ctx.strokeText('PRESS START!', 0, -225);
+        }
+        else
+        {
+            //draw text
+            ctx.font="italic bold 60px Myriad Pro";
+            ctx.fillStyle = '#ff0000';
+            ctx.strokeText("SUMMON YOUR TOTEM", 0, -225);
+            ctx.fillText("SUMMON YOUR TOTEM", 0, -225);
+        }
+    }
+
     if (this.state === Game.START_COUNTDOWN) {
         var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
         var currentNumberTime = mathUtil.fmod(numTime, 1.0);
@@ -119,8 +141,8 @@ Game.prototype.drawHud = function() {
             var s = this.stateTime + 1;
             ctx.scale(s, s);
             ctx.globalAlpha = 1 - this.stateTime;
-            ctx.fillText('TAKEDOWN!', 0, 0);
-            ctx.strokeText('TAKEDOWN!', 0, 0);
+            ctx.fillText('TAKEDOWN!', 0, -225);
+            ctx.strokeText('TAKEDOWN!', 0, -225);
         }
     } else if (this.state === Game.VICTORY) {
         ctx.fillText(this.winnersText, 0, 0);
