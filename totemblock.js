@@ -77,14 +77,7 @@ var loadSprites = function() {
             var tintedVariations = [];
             for (var j = 0; j < 4; ++j) {
                 if (TINTING_AMOUNT > 0) {
-                    var canvas2 = document.createElement('canvas');
-                    canvas2.width = src.width;
-                    canvas2.height = src.height;
-                    var ctx2 = canvas2.getContext('2d');
-                    ctx2.fillStyle = TotemBlock.totemPoleColors[j];
-                    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-                    ctx2.globalCompositeOperation = 'destination-in';
-                    TotemBlock.spriteSrc[i].draw(ctx2, 0, 0);
+                    var solid = src.getSolidColoredVersion(TotemBlock.totemPoleColors[j]);
 
                     var canvas3 = document.createElement('canvas');
                     canvas3.width = src.width;
@@ -92,7 +85,7 @@ var loadSprites = function() {
                     var ctx3 = canvas3.getContext('2d');
                     TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
                     ctx3.globalAlpha = TINTING_AMOUNT;
-                    ctx3.drawImage(canvas2, 0, 0);
+                    solid.draw(ctx3, 0, 0);
                     tintedVariations.push(new Sprite(canvas3));
                 } else {
                     tintedVariations.push(src);
