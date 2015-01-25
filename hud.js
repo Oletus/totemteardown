@@ -4,10 +4,11 @@ Game.HUD_Bar_Green = new Sprite('HUD_Bar_Green.png');
 Game.HUD_Bar_Yellow = new Sprite('HUD_Bar_Yellow.png');
 
 Game.prototype.drawHud = function() {
-    Game.HUD_Bar_Red.draw(ctx, 55,750);
-    Game.HUD_Bar_Blue.draw(ctx, 305,750);
-    Game.HUD_Bar_Green.draw(ctx, 555,750);
-    Game.HUD_Bar_Yellow.draw(ctx, 805,750);
+    var TotemBarY = 733.5;
+    Game.HUD_Bar_Red.draw(ctx, 55,TotemBarY);
+    Game.HUD_Bar_Blue.draw(ctx, 305,TotemBarY);
+    Game.HUD_Bar_Green.draw(ctx, 555,TotemBarY);
+    Game.HUD_Bar_Yellow.draw(ctx, 805,TotemBarY);
 
     //##
     ctx.scale(1.0, 1.0);
@@ -18,9 +19,6 @@ Game.prototype.drawHud = function() {
     ctx.lineWidth = 5;
     ctx.font="italic bold 36px Myriad Pro";
     ctx.textAlign="left";
-    
-    var TotemBarX = 80;
-    var TotemBarY = 757.5;
 
     var TotemWinnerX = 180;
     var TotemWinnerY = 757.5;
@@ -64,7 +62,6 @@ Game.prototype.drawHud = function() {
         }
         ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
         ctx.fillText(text, TotemWinnerX, TotemWinnerY);
-        TotemBarX+=250;
         TotemWinnerX+=250;
     }
 
