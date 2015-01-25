@@ -56,6 +56,8 @@ Game.prototype.reset = function() {
     }
     
     this.winnersText = undefined;
+    
+    resizeGame();
 };
 
 Game.CHOOSE_PLAYERS = -1;
@@ -206,6 +208,7 @@ Game.prototype.start = function() {
                 ++i;
             }
         }
+        resizeGame();
     }
 };
 
@@ -589,7 +592,12 @@ var initGame = function() {
 
 var resizeGame = function() {
     var gameArea = document.getElementById('gameArea');
-    var widthToHeight = SCREEN_WIDTH / SCREEN_HEIGHT;
+    var poles = POLE_COUNT;
+    if (game && game.totemPoles.length > 0) {
+        poles = game.totemPoles.length;
+    }
+    screenWidthForPlayerCount = (poles - 1) * POLE_DISTANCE + 2 * POLE_DISTANCE_FROM_EDGE;
+    var widthToHeight = screenWidthForPlayerCount / SCREEN_HEIGHT;
     var newWidth = window.innerWidth;
     var newHeight = window.innerHeight;
     var newWidthToHeight = newWidth / newHeight;
@@ -608,7 +616,7 @@ var resizeGame = function() {
     gameArea.style.marginLeft = (-newWidth / 2) + 'px';
 
     var gameCanvas = document.getElementById('totemGame');
-    gameCanvas.width = SCREEN_WIDTH;
+    gameCanvas.width = screenWidthForPlayerCount;
     gameCanvas.height = SCREEN_HEIGHT;
 };
 
