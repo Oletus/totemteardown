@@ -17,6 +17,9 @@ var Projectile = function(options) {
     }
 };
 
+Projectile.leftSprite = new Sprite('ArrowLeft.png');
+Projectile.rightSprite = new Sprite('ArrowRight.png');
+
 Projectile.prototype.update = function() {
     this.x += this.velX;
     if (this.x < 0) {
@@ -32,8 +35,13 @@ Projectile.prototype.update = function() {
 };
 
 Projectile.prototype.render = function() {
-    ctx.fillStyle = 'white';
-    canvasUtil.fillCenteredRect(ctx, this.x, this.y, 10, 10);
+    if (this.velX < 0) {
+        Projectile.leftSprite.drawRotated(ctx, this.x, this.y, 0);
+    } else {
+        Projectile.rightSprite.drawRotated(ctx, this.x, this.y, 0);
+    }
+    /*ctx.fillStyle = 'white';
+    canvasUtil.fillCenteredRect(ctx, this.x, this.y, 10, 10);*/
 };
 
 Projectile.prototype.killBox = function() {
