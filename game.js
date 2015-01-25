@@ -19,7 +19,7 @@ Game.prototype.reset = function() {
     this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
 
-    var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
+    var startPoleX = POLE_DISTANCE_FROM_EDGE,
         startPoleY = GROUND_LEVEL;
 
     for(var i = 0; i < POLE_COUNT; i++) {
