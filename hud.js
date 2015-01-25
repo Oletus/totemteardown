@@ -89,14 +89,15 @@ Game.prototype.drawHud = function() {
     {
         if( count >= MIN_PLAYERS )
         {
-                ctx.lineWidth = 1;
-                ctx.font="italic bold 50px Myriad Pro";
-                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
-                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+            ctx.lineWidth = 2;
+            ctx.font="italic bold 50px Myriad Pro";
+            ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+            ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
         } else {
-            ctx.font="italic bold 60px Myriad Pro";
-            ctx.strokeText("SUMMON YOUR TOTEM", 0, 80);
-            ctx.fillText("SUMMON YOUR TOTEM", 0, 80);
+            ctx.lineWidth = 2;
+            ctx.font="italic bold 50px Myriad Pro";
+            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
+            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
         }
     }
     
