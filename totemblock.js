@@ -38,8 +38,8 @@ TotemBlock.Type = {
 };
 
 TotemBlock.spriteSrc = [
-    new Sprite('block-shoot_left.png'),
-    new Sprite('block-shoot_right.png'),
+    new Sprite('block_shoot_left.png'),
+    new Sprite('block_shoot_right.png'),
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
     new Sprite('block-empty.png')
