@@ -170,12 +170,8 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
         var lastBlock = pole.blocks[pole.blocks.length - 1];
         pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: type, state: TotemBlock.APPEARING}));
 
-
         //game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
         //game.fields.push(new Field(new Vector(this.totemPoles[i].x, GROUND_LEVEL)), 1540);
-
-        addNewParticles();
-        plotParticles(canvas.width, canvas.height);
     }
 };
 
@@ -504,11 +500,12 @@ Game.prototype.update = function() {
                     v = z - 75;
                 }
 
-                game.emitters.push(new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2)));
-                //game.fields.push(new Field(new Vector(obj.x - 25, obj.y)), 1540);
-                //game.fields[0].position.x = obj.x - 25;
-                //game.fields[0].position.x = obj.y - 10;
                 this.dynamicObjs.splice(i, 1);
+
+                var em = new Emitter(new Vector(v, obj.y), Vector.fromAngle(0, 2));
+                for (var j = 0; j < EMISSION_RATE; ++j) {
+                    this.particles.push(em.emitParticle());
+                }
             }
         }
     }
@@ -527,7 +524,6 @@ Game.prototype.update = function() {
 
     //console.log(destroyedBox);
 
-    addNewParticles();
     plotParticles(canvas.width, canvas.height);
 };
 
@@ -567,15 +563,9 @@ Game.prototype.render = function() {
     
     Game.fg.draw(ctx, 0, GROUND_LEVEL - Game.fg.height * 0.15);
 
-    if(game.emitters.length > 0) {
-        drawParticles();
-    }
+    drawParticles();
 
     this.drawHud();
-
-    if(game.emitters.length > 0) {
-        killEmitter(0);
-    }
     
     if (this.instructionsRequested > 0 && this.state == Game.CHOOSE_PLAYERS) {
         Game.instructionsSprite.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height * 0.5, 0);
@@ -616,9 +606,7 @@ var initGame = function() {
     game.midX = ctx.canvas.width / 2;
     game.midY = ctx.canvas.height / 2;
 
-    game.emitters = [];
     game.particles = [];
-    game.fields = [new Field(new Vector(), 1540)];
 
     nextFrameTime = new Date().getTime() - 1000 / FPS * 0.5;
     webFrame();
@@ -656,47 +644,24 @@ var resizeGame = function() {
 
 window.addEventListener('resize', resizeGame, false);
 
-var addNewParticles = function() {
-    if (game.particles.length > MAX_PARTICLES) return;
-
-    for (var i = 0; i < game.emitters.length; i++) {
-        for (var j = 0; j < EMISSION_RATE; j++) {
-            game.particles.push(game.emitters[i].emitParticle());
+var plotParticles = function(boundsX, boundsY) {
+    for (var i = 0; i < game.particles.length;) {
+        var particle = game.particles[i];
+        particle.move();
+        if (particle.dead) {
+            game.particles.splice(i, 1);
+        } else {
+            i++;
         }
     }
-};
-
-var plotParticles = function(boundsX, boundsY) {
-    var currentParticles = [];
-
-    for (var i = 0; i < game.particles.length; i++) {
-        var particle = game.particles[i];
-        var pos = particle.position;
-
-        if (pos.x < 0 || pos.x > boundsX || pos.y < 0 || pos.y > boundsY) continue;
-
-        particle.move();
-
-        currentParticles.push(particle);
-    }
-
-    //game.particles = currentParticles;
 };
 
 var drawParticles = function() {
 
     ctx.fillStyle = 'rgb(255,255,255)';
     for (var i = 0; i < game.particles.length; i++) {
-        var position = game.particles[i].position;
-        ctx.fillRect(position.x, position.y, PARTICLE_SIZE, PARTICLE_SIZE);
+        var part = game.particles[i];
+        var position = part.position;
+        ctx.fillRect(position.x, position.y, PARTICLE_SIZE * part.scale(), PARTICLE_SIZE * part.scale());
     }
-};
-
-var killEmitter = function() {
-    setTimeout(function() {
-        game.emitters = [];
-        game.particles = [];
-        game.fields = [];
-
-    }, 1000);
 };
