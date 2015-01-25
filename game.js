@@ -136,6 +136,9 @@ Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
                 decided = false;
             }
         }
+        if (pole.blocks.length > 0 && pole.blocks[pole.blocks.length - 1].type == type) {
+            decided = false;
+        }
         ++tryIndex;
     }
     return type;
