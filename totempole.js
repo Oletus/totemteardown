@@ -64,3 +64,7 @@ TotemPole.prototype.blockCount = function(type) {
     }
     return total;
 };
+
+TotemPole.prototype.isInitialized = function() {
+    return this.blocks.length > 0 && this.blocks[0].type == TotemBlock.Type.HEAD;
+};

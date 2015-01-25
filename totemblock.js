@@ -35,7 +35,8 @@ TotemBlock.Type = {
     SHIELD: 2,
     JUMP: 3,
     EMPTY: 4,
-    HEAD: 5
+    INIT: 5,
+    HEAD: 6
 };
 
 TotemBlock.spriteSrc = [
@@ -43,7 +44,8 @@ TotemBlock.spriteSrc = [
     new Sprite('block_shoot_right.png'),
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
-    new Sprite('block-empty.png')
+    new Sprite('block-empty.png'),
+    new Sprite('block-init.png')
 ];
 
 TotemBlock.headSprites = [
@@ -60,6 +62,8 @@ TotemBlock.hitSprites = [
 
 TotemBlock.sprites = null;
 
+TotemBlock.whiteSprites = null;
+
 TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
 var loadSprites = function() {
@@ -70,31 +74,31 @@ var loadSprites = function() {
             return;
         }
     }
-    TotemBlock.sprites = (function() {
-        var sprites = [];
-        for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
-            var src = TotemBlock.spriteSrc[i];
-            var tintedVariations = [];
-            for (var j = 0; j < 4; ++j) {
-                if (TINTING_AMOUNT > 0) {
-                    var solid = src.getSolidColoredVersion(TotemBlock.totemPoleColors[j]);
+    TotemBlock.sprites = [];
+    TotemBlock.whiteSprites = [];
+    for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
+        var src = TotemBlock.spriteSrc[i];
+        var tintedVariations = [];
+        for (var j = 0; j < 4; ++j) {
+            if (TINTING_AMOUNT > 0) {
+                var solid = src.getSolidColoredVersion(TotemBlock.totemPoleColors[j]);
 
-                    var canvas3 = document.createElement('canvas');
-                    canvas3.width = src.width;
-                    canvas3.height = src.height;
-                    var ctx3 = canvas3.getContext('2d');
-                    TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
-                    ctx3.globalAlpha = TINTING_AMOUNT;
-                    solid.draw(ctx3, 0, 0);
-                    tintedVariations.push(new Sprite(canvas3));
-                } else {
-                    tintedVariations.push(src);
-                }
+                var canvas3 = document.createElement('canvas');
+                canvas3.width = src.width;
+                canvas3.height = src.height;
+                var ctx3 = canvas3.getContext('2d');
+                TotemBlock.spriteSrc[i].draw(ctx3, 0, 0);
+                ctx3.globalAlpha = TINTING_AMOUNT;
+                solid.draw(ctx3, 0, 0);
+                tintedVariations.push(new Sprite(canvas3));
+            } else {
+                tintedVariations.push(src);
             }
-            sprites.push(tintedVariations);
         }
-        return sprites;
-    })();
+        TotemBlock.sprites.push(tintedVariations);
+        var white = src.getSolidColoredVersion('#fff');
+        TotemBlock.whiteSprites.push(white);
+    }
 };
 
 loadSprites();
