@@ -5,11 +5,6 @@ var ctx;
 var game;
 
 var Game = function() {
-    this.f = 0;
-    
-    this.bg = new Sprite('BackgroundSky.png');
-    this.fg = new Sprite('foreground.png');
-
     this.totemPoles = [];
     this.dynamicObjs = [];
     
@@ -66,6 +61,9 @@ Game.cursorSprites = [
     new Sprite('cursor2.png'),
     new Sprite('cursor3.png')
 ];
+
+Game.bg = new Sprite('BackgroundSky.png');
+Game.fg = new Sprite('foreground.png');
 
 Game.prototype.debugMode = function(e) {
 
@@ -373,7 +371,7 @@ Game.prototype.update = function() {
 
 Game.prototype.render = function() {
     var i;
-    this.bg.fillCanvasFitBottom(ctx);
+    Game.bg.fillCanvasFitBottom(ctx);
     
     var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
     ctx.fillStyle = '#f80';
@@ -408,7 +406,7 @@ Game.prototype.render = function() {
         this.dynamicObjs[i].render();
     }
     
-    this.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + this.fg.height * 0.2, 0, ctx.canvas.width / this.fg.width);
+    Game.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + Game.fg.height * 0.2, 0, ctx.canvas.width / Game.fg.width);
 
     ctx.font = '100px sans-serif';
     ctx.textAlign = 'center';
