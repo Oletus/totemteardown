@@ -33,6 +33,8 @@ var Game = function() {
     this.shieldSound = new Audio('shield', false);
     this.thunderSound = new Audio('thunder', false);
 
+    this.particleSystem = new ParticleSystem();
+
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
