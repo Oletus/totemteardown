@@ -5,35 +5,29 @@ var ctx;
 var game;
 
 var Game = function() {
-    this.f = 0;
-    
-    this.bg = new Sprite('BackgroundSky.png');
+    this.reset();
+};
 
+Game.prototype.reset = function() {
     this.totemPoles = [];
     this.dynamicObjs = [];
-    
+
     this.stateTime = 0;
     this.state = Game.START_COUNTDOWN;
-    
-    this.blockAppearTimer = BLOCK_APPEAR_INTERVAL - FIRST_BLOCK_APPEAR;
+
+    this.blockAppearInterval = BLOCK_APPEAR_INTERVAL;
+    this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
+    
+    this.cursors = [];
+    while (this.cursors.length < POLE_COUNT) {
+        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
+    }
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
         startPoleY = GROUND_LEVEL;
 
-    this.cursors = [];
-
-    this.backgroundMusic = new Audio('music', true);
-
-    if(SOUND_ON) {
-        this.backgroundMusic.play();
-    }
-
-    this.explosionSound = new Audio('explosion', false);
-    this.shieldSound = new Audio('shield', false);
-    this.thunderSound = new Audio('thunder', false);
-
-    for(var i = 0; i < 4; i++) {
+    for(var i = 0; i < POLE_COUNT; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
@@ -47,15 +41,39 @@ var Game = function() {
 
     this.gamepads = new Gamepads(this);
 
-    this.gamepads.addButtonChangeListener(13, this.moveCursorDown);
-    this.gamepads.addButtonChangeListener(12, this.moveCursorUp);
-    this.gamepads.addButtonChangeListener(0, this.selectBlock, this.deselectBlock);
-    this.gamepads.addButtonChangeListener(2, this.activateBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.DOWN, this.moveCursorDown);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.UP, this.moveCursorUp);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.LEFT, this.cursorLeft);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.RIGHT, this.cursorRight);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
+    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     addEventListener("keydown", this.debugMode, false);
+
+    if(SOUND_ON) {
+        Game.backgroundMusic.play();
+    }
+    
+    this.winnersText = undefined;
 };
 
 Game.START_COUNTDOWN = 0;
 Game.PLAYING = 1;
+Game.VICTORY = 2;
+
+Game.cursorSprites = [
+    new Sprite('cursor0.png'),
+    new Sprite('cursor1.png'),
+    new Sprite('cursor2.png'),
+    new Sprite('cursor3.png')
+];
+
+Game.bg = new Sprite('BackgroundSky.png');
+Game.fg = new Sprite('foreground.png');
+
+Game.backgroundMusic = new Audio('music', true);
+Game.explosionSound = new Audio('explosion', false);
+Game.shieldSound = new Audio('shield', false);
+Game.thunderSound = new Audio('thunder', false);
 
 Game.prototype.debugMode = function(e) {
 
@@ -75,9 +93,6 @@ Game.prototype.debugMode = function(e) {
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
-    while (this.cursors.length <= playerNumber) {
-        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
-    }
     return this.cursors[playerNumber];
 };
 
@@ -96,14 +111,13 @@ Game.prototype.clampAllCursors = function() {
     }
 };
 
-Game.prototype.getBlockTypeForPole = function(pole, types) {
-    var tryIndex = this.appearPhase;
+Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
     var decided = false;
-    while (!decided) {    
+    while (!decided) {
         var type = TotemBlock.typeFromChar(types[tryIndex % types.length]);
         decided = true;
         if (AVOID_CREATING_OVERREPRESENTED_BLOCKS) {
-            if (pole.blockCount(type) >= pole.blocks.length * 0.49) {
+            if (pole.blocks.length > 0 && pole.blockCount(type) >= pole.blocks.length * 0.49) {
                 decided = false;
             }
         }
@@ -112,31 +126,56 @@ Game.prototype.getBlockTypeForPole = function(pole, types) {
     return type;
 };
 
+Game.prototype.spawnBlockInPole = function(i, tryIndex) {
+    var pole = this.totemPoles[i];
+    if (pole.blocks.length < VICTORY_BLOCKS) {
+        var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
+        var type = this.getBlockTypeForPole(pole, types, tryIndex);
+        pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+
+
+        game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(0, 2)));
+        game.fields.push(new Field(new Vector(this.totemPoles[i].x, GROUND_LEVEL)), 1540);
+
+        addNewParticles();
+        plotParticles(canvas.width, canvas.height);
+    }
+};
+
 Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
+        this.spawnBlockInPole(i, this.appearPhase);
+    }
+
+    this.winnersText = [];
+    for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
-        if (pole.blocks.length <= VICTORY_BLOCKS) {
-            var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
-            var type = this.getBlockTypeForPole(pole, types);
-            pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
+        if (pole.blocks.length >= VICTORY_BLOCKS) {
+            this.winnersText.push('player ' + (i + 1));
+            if (this.state != Game.VICTORY) {
+                this.state = Game.VICTORY;
+                this.stateTime = 0;
+            }
         }
     }
-
-
-    this.backgroundMusic.volume = 0.01;
-    this.thunderSound.volume = 0.3;
-
-    if(SOUND_ON) {
-        this.thunderSound.play();
+    if (this.state === Game.VICTORY) {
+        this.winnersText = 'Congrats, ' + this.winnersText.join(', ') + '!';
     }
 
-    this.backgroundMusic.volume = 1;
+    Game.backgroundMusic.volume = 0.01;
+    Game.thunderSound.volume = 0.3;
+
+    if(SOUND_ON) {
+        Game.thunderSound.playClone();
+    }
+
+    Game.backgroundMusic.volume = 1;
 
     ++this.appearPhase;
 };
 
 Game.prototype.swap = function(pole, blockA, blockB) {
-    if (this.state == Game.START_COUNTDOWN) {
+    if (this.state != Game.PLAYING) {
         return false;
     }
     var poleObj = this.totemPoles[pole];
@@ -190,11 +229,41 @@ Game.prototype.moveCursorUp = function(playerNumber) {
     }
 };
 
+Game.prototype.cursorLeft = function(playerNumber) {
+    if (CAN_AIM_EAGLES) {
+        var cursor = this.cursorActive(playerNumber);
+        if (this.hasBlock(cursor.pole, cursor.block)) {
+            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            if (block.type === TotemBlock.Type.SHOOTRIGHT) {
+                block.type = TotemBlock.Type.SHOOTLEFT;
+            }
+        }
+    }
+};
+
+Game.prototype.cursorRight = function(playerNumber) {
+    if (CAN_AIM_EAGLES) {
+        var cursor = this.cursorActive(playerNumber);
+        if (this.hasBlock(cursor.pole, cursor.block)) {
+            var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            if (block.type === TotemBlock.Type.SHOOTLEFT) {
+                block.type = TotemBlock.Type.SHOOTRIGHT;
+            }
+        }
+    }
+};
+
 Game.prototype.hasBlock = function(pole, block) {
     return this.totemPoles[pole].blocks.length > block;
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
+    }
     var cursor = this.cursorActive(playerNumber);
     cursor.selected = true;
 };
@@ -223,6 +292,12 @@ Game.prototype.activeProjectiles = function(playerNumber) {
 };
 
 Game.prototype.activateBlock = function(playerNumber) {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
+    }
     if (this.state == Game.START_COUNTDOWN) {
         return;
     }
@@ -236,11 +311,63 @@ Game.prototype.activateBlock = function(playerNumber) {
     }
 };
 
+/**
+ * @return {boolean} True if a block was hit.
+ */
+Game.prototype.killBlocks = function(killBox) {
+    for (var j = 0; j < this.totemPoles.length; ++j) {
+        for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
+            var block = this.totemPoles[j].blocks[k];
+            var hitBox = block.hitBox();
+            hitBox.intersectRect(killBox);
+            if (!hitBox.isEmpty()) {
+                var blocked = false;
+                if (block.type === TotemBlock.Type.SHIELD) {
+                    if (BLOCK_BOTH_DIRECTIONS) {
+                        blocked = true;
+                    } else {
+                        if (obj.velX < 0 && !block.facingLeft) {
+                            blocked = true;
+                        }
+                        if (obj.velX > 0 && block.facingLeft) {
+                            blocked = true;
+                        }
+                    }
+                }
+
+                if(blocked) {
+                    if (block.hitpoints >= 0) {
+                        block.hitpoints -= 1;
+                        if (block.hitpoints <= 0) {
+                            blocked = false;
+                        }
+                    }
+                    if(blocked && SOUND_ON) {
+                        Game.shieldSound.playClone();
+                    }
+                }
+
+                if (!blocked) {
+
+                    if(SOUND_ON) {
+                        Game.explosionSound.playClone();
+                    }
+
+                    this.totemPoles[j].blocks.splice(k, 1);
+                    this.clampAllCursors();
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
     var i;
     this.gamepads.update();
-   
+
     this.stateTime += 1/FPS;
     if (this.state === Game.START_COUNTDOWN) {
         if (this.stateTime > START_COUNTDOWN_DURATION) {
@@ -248,12 +375,16 @@ Game.prototype.update = function() {
             this.stateTime = 0;
         }
     }
-   
-   for(i = 0; i < this.totemPoles.length; i++) {
-       this.totemPoles[i].update();
-   }
 
-   
+    for(i = 0; i < this.totemPoles.length; i++) {
+        var pole = this.totemPoles[i];
+        pole.update();
+        while (pole.spawnBlocks > 0) {
+            this.spawnBlockInPole(i, pole.spawnBlocks);
+            pole.spawnBlocks--;
+        }
+    }
+
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         var obj = this.dynamicObjs[i];
         obj.update();
@@ -261,69 +392,33 @@ Game.prototype.update = function() {
             this.dynamicObjs.splice(i, 1);
         } else {
             var killBox = obj.killBox();
-            for (var j = 0; j < this.totemPoles.length; ++j) {
-                for (var k = 0; k < this.totemPoles[j].blocks.length; ++k) {
-                    var block = this.totemPoles[j].blocks[k];
-                    var hitBox = block.hitBox();
-                    hitBox.intersectRect(killBox);
-                    if (!hitBox.isEmpty()) {
-                        var blocked = false;
-                        if (block.type === TotemBlock.Type.SHIELD) {
-                            if (BLOCK_BOTH_DIRECTIONS) {
-                                blocked = true;
-                            } else {
-                                if (obj.velX < 0 && !block.facingLeft) {
-                                    blocked = true;
-                                }
-                                if (obj.velX > 0 && block.facingLeft) {
-                                    blocked = true;
-                                }
-                            }
-                        }
-
-                        if(blocked) {
-                            if(SOUND_ON) {
-                                this.shieldSound.play();
-                            }
-                        }
-
-                        if (!blocked) {
-
-                            if(SOUND_ON) {
-                                this.explosionSound.play();
-                            }
-
-                            var killedBlock = this.totemPoles[j].blocks[k];
-
-                            this.emitter = new ParticleEmitter(new Vector(killedBlock.x, killedBlock.y), Vector.fromAngle(0, 2), Math.PI / 32, 100, ctx);
-
-                            this.emitter.update(800, 600);
-
-                            this.totemPoles[j].blocks.splice(k, 1);
-                            this.clampAllCursors();
-                        }
-                        this.dynamicObjs.splice(i, 1);
-                    }
-                }
+            if (this.killBlocks(killBox)) {
+                game.emitters.push(new Emitter(new Vector(obj.x - 25, obj.y - 25), Vector.fromAngle(0, 2)));
+                game.fields.push(new Field(new Vector(obj.x - 25, obj.y)), 1540);
+                this.dynamicObjs.splice(i, 1);
             }
         }
     }
-    
+
     this.blockAppearTimer += 1/FPS;
-    if (BLOCK_APPEAR_INTERVAL > 0 && this.blockAppearTimer > BLOCK_APPEAR_INTERVAL) {
+    if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval && this.state == Game.PLAYING) {
         this.blockAppearTimer = 0;
         this.spawnNewBlocks();
-        BLOCK_APPEAR_INTERVAL -= BLOCK_APPEAR_INTERVAL_REDUCE;
-        if (BLOCK_APPEAR_INTERVAL < BLOCK_APPEAR_INTERVAL_MIN) {
-            BLOCK_APPEAR_INTERVAL = BLOCK_APPEAR_INTERVAL_MIN;
+        this.blockAppearInterval -= BLOCK_APPEAR_INTERVAL_REDUCE;
+        if (this.blockAppearInterval < BLOCK_APPEAR_INTERVAL_MIN) {
+            this.blockAppearInterval = BLOCK_APPEAR_INTERVAL_MIN;
         }
     }
+
+    addNewParticles();
+    plotParticles(canvas.width, canvas.height);
 };
 
 Game.prototype.render = function() {
     var i;
-    this.bg.fillCanvasFitBottom(ctx);
-    
+
+    Game.bg.fillCanvas(ctx);
+
     var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
     ctx.fillStyle = '#f80';
     ctx.fillRect(0, victoryLineHeight, ctx.canvas.width, 2);
@@ -334,20 +429,33 @@ Game.prototype.render = function() {
 
     for (i = 0; i < this.cursors.length; ++i) {
         var cursor = this.cursors[i];
-        if(cursor.selected) {
-            ctx.strokeStyle = '#FFFF00';
-        } else {
-            ctx.strokeStyle = '#00FF00';    
-        }
-        ctx.lineWidth = 5;
         if (this.hasBlock(cursor.pole, cursor.block)) {
             var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+            Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
+
+            /*ctx.strokeStyle = TotemBlock.totemPoleColors[i];
+            ctx.lineWidth = 6;
             canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);
+
+            ctx.strokeStyle = '#fff';
+            if (cursor.selected) {
+                ctx.lineWidth = 4;
+            } else {
+                ctx.lineWidth = 2;
+            }
+            
+            canvasUtil.strokeCenteredRect(ctx, block.x, block.y, cursor.width, cursor.height);*/
         }
     }
     
     for (i = 0; i < this.dynamicObjs.length; ++i) {
         this.dynamicObjs[i].render();
+    }
+    
+    Game.fg.drawRotated(ctx, ctx.canvas.width * 0.5, GROUND_LEVEL + Game.fg.height * 0.2, 0, ctx.canvas.width / Game.fg.width);
+
+    if(game.emitters.length > 0) {
+        drawParticles();
     }
 
     ctx.font = '100px sans-serif';
@@ -370,10 +478,16 @@ Game.prototype.render = function() {
             ctx.globalAlpha = 1 - this.stateTime;
             ctx.fillText('PLAY!', 0, 0);
         }
+    } else if (this.state === Game.VICTORY) {
+        ctx.scale(0.5, 0.5);
+        ctx.fillStyle = '#000';
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = '#fff';
+        ctx.fillText(this.winnersText, 0, 0);
     }
 
-    if(this.emitter) {
-        this.emitter.drawParticles();
+    if(game.emitters.length > 0) {
+        killEmitter(0);
     }
 
     ctx.restore();
@@ -402,14 +516,94 @@ var webFrame = function() {
 
 
 var initGame = function() {
-    canvas = document.createElement('canvas');
-    canvas.width = SCREEN_WIDTH;
-    canvas.height = 700;
-    document.body.appendChild(canvas);
+    canvas = document.getElementById('totemGame');
+
+    resizeGame();
+
     ctx = canvas.getContext('2d');
 
     game = new Game();
-    
+
+    game.midX = ctx.canvas.width / 2;
+    game.midY = ctx.canvas.height / 2;
+
+    game.emitters = [];
+    game.particles = [];
+    game.fields = [];
+
     nextFrameTime = new Date().getTime() - 1000 / FPS * 0.5;
     webFrame();
 };
+
+var resizeGame = function() {
+    var gameArea = document.getElementById('gameArea');
+    var widthToHeight = 4 / 3;
+    var newWidth = window.innerWidth;
+    var newHeight = window.innerHeight;
+    var newWidthToHeight = newWidth / newHeight;
+
+    if (newWidthToHeight > widthToHeight) {
+        newWidth = newHeight * widthToHeight;
+        gameArea.style.height = newHeight + 'px';
+        gameArea.style.width = newWidth + 'px';
+    } else {
+        newHeight = newWidth / widthToHeight;
+        gameArea.style.width = newWidth + 'px';
+        gameArea.style.height = newHeight + 'px';
+    }
+
+    gameArea.style.marginTop = (-newHeight / 2) + 'px';
+    gameArea.style.marginLeft = (-newWidth / 2) + 'px';
+
+    var gameCanvas = document.getElementById('totemGame');
+    gameCanvas.width = newWidth;
+    gameCanvas.height = newHeight;
+};
+
+window.addEventListener('resize', resizeGame, false);
+
+function addNewParticles() {
+    if (game.particles.length > MAX_PARTICLES) return;
+
+    for (var i = 0; i < game.emitters.length; i++) {
+        for (var j = 0; j < EMISSION_RATE; j++) {
+            game.particles.push(game.emitters[i].emitParticle());
+        }
+    }
+}
+
+function plotParticles(boundsX, boundsY) {
+    var currentParticles = [];
+
+    for (var i = 0; i < game.particles.length; i++) {
+        var particle = game.particles[i];
+        var pos = particle.position;
+
+        if (pos.x < 0 || pos.x > boundsX || pos.y < 0 || pos.y > boundsY) continue;
+
+        particle.submitToFields(game.fields[0]);
+
+        particle.move();
+
+        currentParticles.push(particle);
+    }
+
+    particles = currentParticles;
+}
+
+function drawParticles() {
+    ctx.fillStyle = 'rgb(125,47,12)';
+    for (var i = 0; i < game.particles.length; i++) {
+        var position = game.particles[i].position;
+        ctx.fillRect(position.x, position.y, PARTICLE_SIZE, PARTICLE_SIZE);
+    }
+}
+
+function killEmitter() {
+    setTimeout(function() {
+        game.emitters = [];
+        game.particles = [];
+        game.fields = [];
+
+    }, 150);
+}

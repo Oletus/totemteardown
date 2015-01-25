@@ -2,8 +2,8 @@ var Cursor = function(options) {
     var defaults = {
         pole: 0,
         block: 0,
-        width: 50,
-        height: 50,
+        width: CURSOR_WIDTH,
+        height: CURSOR_HEIGHT,
         selected: false
     };
 
