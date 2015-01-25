@@ -52,11 +52,13 @@ Game.prototype.drawHud = function() {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
 
-        Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
-        ctx.fillStyle = guiColors[i];
-        ctx.textAlign="center";
-        ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
-        ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+        if (text !== '') {
+            Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
+            ctx.fillStyle = guiColors[i];
+            ctx.textAlign="center";
+            ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
+            ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+        }
 
         if (this.state === Game.CHOOSE_PLAYERS) {
             var ptext = 'P' + (i + 1);
@@ -96,8 +98,11 @@ Game.prototype.drawHud = function() {
         } else {
             ctx.lineWidth = 2;
             ctx.font="italic bold 50px Myriad Pro";
-            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
-            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
+            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
+            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
+            ctx.font="italic bold 40px Myriad Pro";
+            ctx.strokeText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
+            ctx.fillText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
         }
     }
     

@@ -10,10 +10,11 @@ Emitter.prototype.emitParticle = function() {
     var angle = this.velocity.getAngle() + this.spread - (Math.random() * this.spread * 2);
 
     // The magnitude of the emitter's velocity
-    var magnitude = this.velocity.getMagnitude();
+    var magnitude = this.velocity.getMagnitude() * (Math.random() + 0.1);
 
     // The emitter's position
     var position = new Vector(this.position.x, this.position.y);
+    position.add(Vector.fromAngle(Math.random() * Math.PI * 2, Math.random() * 20));
 
     // New velocity based off of the calculated angle and magnitude
     var velocity = Vector.fromAngle(angle, magnitude);
