@@ -98,8 +98,11 @@ Game.prototype.drawHud = function() {
         } else {
             ctx.lineWidth = 2;
             ctx.font="italic bold 50px Myriad Pro";
-            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
-            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 80);
+            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
+            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
+            ctx.font="italic bold 40px Myriad Pro";
+            ctx.strokeText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
+            ctx.fillText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
         }
     }
     
