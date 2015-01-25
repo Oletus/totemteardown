@@ -17,6 +17,10 @@ var TotemBlock = function(options) {
             this[key] = options[key];
         }
     }
+
+    this.woodSound = new Audio('wood', false);
+    this.eagleRoar = new Audio('eagle', false);
+    this.swooshSound = new Audio('swoosh', false);
 };
 
 TotemBlock.SUPPORTED = 0;
@@ -157,6 +161,10 @@ TotemBlock.prototype.update = function(supportedLevel) {
             this.y = supportedLevel;
             this.state = TotemBlock.SUPPORTED;
             this.velY = 0;
+
+            if(SOUND_ON) {
+                this.woodSound.play();
+            }
         }
     }
     
@@ -226,11 +234,27 @@ TotemBlock.prototype.activate = function(playerNumber) {
             this.state = TotemBlock.FALLING;
             this.velY -= JUMP_SPEED;
         }
+
+        if(SOUND_ON) {
+            this.swooshSound.play();
+        }
+
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
+
+        if(SOUND_ON) {
+            this.eagleRoar.play();
+        }
+
+
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
+
+        if(SOUND_ON) {
+            this.eagleRoar.play();
+        }
+
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];

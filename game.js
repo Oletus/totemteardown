@@ -23,6 +23,16 @@ var Game = function() {
 
     this.cursors = [];
 
+    this.backgroundMusic = new Audio('music', true);
+
+    if(SOUND_ON) {
+        this.backgroundMusic.play();
+    }
+
+    this.explosionSound = new Audio('explosion', false);
+    this.shieldSound = new Audio('shield', false);
+    this.thunderSound = new Audio('thunder', false);
+
     for(var i = 0; i < 4; i++) {
         this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
         var startBlockY = startPoleY - STARTING_BLOCKS * BLOCK_HEIGHT * 1.5;
@@ -111,6 +121,17 @@ Game.prototype.spawnNewBlocks = function() {
             pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
         }
     }
+
+
+    this.backgroundMusic.volume = 0.01;
+    this.thunderSound.volume = 0.3;
+
+    if(SOUND_ON) {
+        this.thunderSound.play();
+    }
+
+    this.backgroundMusic.volume = 1;
+
     ++this.appearPhase;
 };
 
@@ -207,7 +228,8 @@ Game.prototype.activateBlock = function(playerNumber) {
     }
     var cursor = this.cursorActive(playerNumber);
     if (this.hasBlock(cursor.pole, cursor.block)) {
-        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber);
+
+        var addedObjs = this.totemPoles[cursor.pole].blocks[cursor.block].activate(playerNumber, this.eagleRoar);
         if (this.activeProjectiles(playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER) {
             this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
@@ -257,7 +279,19 @@ Game.prototype.update = function() {
                                 }
                             }
                         }
+
+                        if(blocked) {
+                            if(SOUND_ON) {
+                                this.shieldSound.play();
+                            }
+                        }
+
                         if (!blocked) {
+
+                            if(SOUND_ON) {
+                                this.explosionSound.play();
+                            }
+
                             this.totemPoles[j].blocks.splice(k, 1);
                             this.clampAllCursors();
                         }
