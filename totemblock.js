@@ -342,6 +342,16 @@ TotemBlock.prototype.activate = function(playerNumber) {
     return [];
 };
 
+TotemBlock.prototype.canBeActivated = function() {
+    if ((this.type === TotemBlock.Type.SHOOTLEFT || this.type === TotemBlock.Type.SHOOTRIGHT) && this.canShoot) {
+        return true;
+    }
+    if (this.type === TotemBlock.Type.JUMP && this.state == TotemBlock.SUPPORTED) {
+        return true;
+    }
+    return false;
+};
+
 TotemBlock.prototype.hitBox = function() {
     return new Rect(this.x - this.width * 0.5, this.x + this.width * 0.5, this.y - this.height * 0.5, this.y + this.height * 0.5);
 };

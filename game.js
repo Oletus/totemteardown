@@ -81,6 +81,8 @@ Game.explosionSound = new Audio('explosion', false);
 Game.shieldSound = new Audio('shield', false);
 Game.thunderSound = new Audio('thunder', false);
 
+Game.xSprite = new Sprite('button_x.png');
+
 Game.prototype.debugMode = function(e) {
 
 
@@ -520,6 +522,13 @@ Game.prototype.render = function() {
             if (this.hasBlock(cursor.pole, cursor.block)) {
                 var block = this.totemPoles[cursor.pole].blocks[cursor.block];
                 Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
+                if (block.canBeActivated() && this.state === Game.PLAYING) {
+                    if (block.type == TotemBlock.Type.SHOOTRIGHT) {
+                        Game.xSprite.drawRotated(ctx, block.x + 65, block.y, 0);
+                    } else {
+                        Game.xSprite.drawRotated(ctx, block.x - 65, block.y, 0);
+                    }
+                };
             }
         }
     }
