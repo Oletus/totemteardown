@@ -32,14 +32,14 @@ TotemPole.prototype.update = function() {
         } else {
             chain = 0;
         }
-        if (chain == 3 && MATCH_THREE_EMPTY) {
-            this.blocks.splice(i, 2);
+        if (chain == 2 && MATCH_THREE_EMPTY) {
+            this.blocks.splice(i, 1);
             topIndex = i - 1;
             if (topIndex >= 0 && this.blocks[topIndex].state != TotemBlock.SWAPPING) {
                 this.blocks[topIndex].state = TotemBlock.FALLING;
             }
             chain = 0;
-            this.spawnBlocks += 3;
+            this.spawnBlocks += 2;
         }
     }
 };

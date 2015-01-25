@@ -38,7 +38,7 @@ APPEAR_TYPES = [
 AVOID_CREATING_OVERREPRESENTED_BLOCKS = true;
 
 
-CAN_AIM_EAGLES = true;
+CAN_AIM_EAGLES = false;
 
 MATCH_THREE_EMPTY = true;
 
@@ -51,7 +51,7 @@ BLOCK_APPEAR_INTERVAL_MIN = 4; // seconds
 
 START_COUNTDOWN_DURATION = 3; // seconds
 
-SOUND_ON = false;
+SOUND_ON = true;
 
 TINTING_AMOUNT = 0; // from 0 to 1
 
