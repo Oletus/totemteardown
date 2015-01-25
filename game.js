@@ -18,11 +18,6 @@ Game.prototype.reset = function() {
     this.blockAppearInterval = BLOCK_APPEAR_INTERVAL;
     this.blockAppearTimer = this.blockAppearInterval - FIRST_BLOCK_APPEAR;
     this.appearPhase = 0;
-    
-    this.cursors = [];
-    while (this.cursors.length < POLE_COUNT) {
-        this.cursors.push(new Cursor({block: 0, pole: this.cursors.length}));
-    }
 
     var startPoleX = ctx.canvas.width * 0.5 - POLE_DISTANCE * (POLE_COUNT - 1) * 0.5,
         startPoleY = GROUND_LEVEL;
@@ -37,6 +32,12 @@ Game.prototype.reset = function() {
             this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
         }
         startPoleX += POLE_DISTANCE;
+        this.totemPoles[i].addHead();
+    }
+
+    this.cursors = [];
+    for (var i = 0; i < POLE_COUNT; ++i) {
+        this.cursors.push(new Cursor({block: this.totemPoles[i].blocks.length - 1, pole: i}));
     }
 
     this.gamepads = new Gamepads(this);
@@ -100,8 +101,8 @@ Game.prototype.clampCursor = function(cursor) {
     if (cursor.block >= this.totemPoles[cursor.pole].blocks.length) {
         cursor.block = this.totemPoles[cursor.pole].blocks.length - 1;
     }
-    if (cursor.block < 0) {
-        cursor.block = 0;
+    if (cursor.block < 1) {
+        cursor.block = 1;
     }
 };
 

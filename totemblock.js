@@ -35,7 +35,7 @@ TotemBlock.Type = {
     SHIELD: 2,
     JUMP: 3,
     EMPTY: 4,
-    STATIC: 5 // used for something like the totem head, that's not interactive
+    HEAD: 5
 };
 
 TotemBlock.spriteSrc = [
@@ -44,6 +44,13 @@ TotemBlock.spriteSrc = [
     new Sprite('block-shield.png'),
     new Sprite('block-jump.png'),
     new Sprite('block-empty.png')
+];
+
+TotemBlock.headSprites = [
+    new Sprite('head0.png'),
+    new Sprite('head1.png'),
+    new Sprite('head2.png'),
+    new Sprite('head3.png')
 ];
 
 TotemBlock.hitSprites = [
@@ -181,15 +188,19 @@ TotemBlock.prototype.update = function(supportedLevel) {
 };
 
 TotemBlock.prototype.render = function(color) {
-    if (TotemBlock.sprites !== null) {
-        TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
-    }
-    
-    if (this.type == TotemBlock.Type.SHIELD) {
-        if (this.hitpoints == 2) {
-            TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
-        } else if (this.hitpoints == 1) {
-            TotemBlock.hitSprites[1].drawRotated(ctx, this.x, this.y, 0);
+    if (this.type == TotemBlock.Type.HEAD) {
+        TotemBlock.headSprites[color].drawRotated(ctx, this.x, this.y - 50, 0);
+    } else {
+        if (TotemBlock.sprites !== null) {
+            TotemBlock.sprites[this.type][color].drawRotated(ctx, this.x, this.y, 0);
+        }
+        
+        if (this.type == TotemBlock.Type.SHIELD) {
+            if (this.hitpoints == 2) {
+                TotemBlock.hitSprites[0].drawRotated(ctx, this.x, this.y, 0);
+            } else if (this.hitpoints == 1) {
+                TotemBlock.hitSprites[1].drawRotated(ctx, this.x, this.y, 0);
+            }
         }
     }
     // Commented: debug draw mode

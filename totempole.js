@@ -44,6 +44,11 @@ TotemPole.prototype.update = function() {
     }
 };
 
+TotemPole.prototype.addHead = function() {
+    var headY = this.blocks[0].y - BLOCK_HEIGHT;
+    this.blocks.splice(0, 0, new TotemBlock({x: this.x, y: headY, type: TotemBlock.Type.HEAD}));
+};
+
 TotemPole.prototype.render = function() {
     for(var j = 0; j < this.blocks.length; j++) {
         this.blocks[j].render(this.color);
