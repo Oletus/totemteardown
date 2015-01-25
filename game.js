@@ -180,6 +180,9 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
 Game.prototype.spawnNewBlocks = function() {
     for (var i = 0; i < this.totemPoles.length; ++i) {
         this.spawnBlockInPole(i, this.appearPhase);
+        if (this.totemPoles[i].blocks.length < 7) {
+            this.spawnBlockInPole(i, this.appearPhase);
+        }
     }
 
     this.winnersText = [];
