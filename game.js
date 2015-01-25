@@ -52,10 +52,13 @@ Game.prototype.reset = function() {
     if(SOUND_ON) {
         Game.backgroundMusic.play();
     }
+    
+    this.winnersText = undefined;
 };
 
 Game.START_COUNTDOWN = 0;
 Game.PLAYING = 1;
+Game.VICTORY = 2;
 
 Game.cursorSprites = [
     new Sprite('cursor0.png'),
@@ -125,7 +128,7 @@ Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
 
 Game.prototype.spawnBlockInPole = function(i, tryIndex) {
     var pole = this.totemPoles[i];
-    if (pole.blocks.length <= VICTORY_BLOCKS) {
+    if (pole.blocks.length < VICTORY_BLOCKS) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex);
         pole.blocks.push(new TotemBlock({x: pole.x, y: pole.y + BLOCK_HEIGHT * 0.5, type: type, state: TotemBlock.APPEARING}));
@@ -137,6 +140,20 @@ Game.prototype.spawnNewBlocks = function() {
         this.spawnBlockInPole(i, this.appearPhase);
     }
 
+    this.winnersText = [];
+    for (var i = 0; i < this.totemPoles.length; ++i) {
+        var pole = this.totemPoles[i];
+        if (pole.blocks.length >= VICTORY_BLOCKS) {
+            this.winnersText.push('player ' + (i + 1));
+            if (this.state != Game.VICTORY) {
+                this.state = Game.VICTORY;
+                this.stateTime = 0;
+            }
+        }
+    }
+    if (this.state === Game.VICTORY) {
+        this.winnersText = 'Congrats, ' + this.winnersText.join(', ') + '!';
+    }
 
     Game.backgroundMusic.volume = 0.01;
     Game.thunderSound.volume = 0.3;
@@ -151,7 +168,7 @@ Game.prototype.spawnNewBlocks = function() {
 };
 
 Game.prototype.swap = function(pole, blockA, blockB) {
-    if (this.state == Game.START_COUNTDOWN) {
+    if (this.state != Game.PLAYING) {
         return false;
     }
     var poleObj = this.totemPoles[pole];
@@ -234,6 +251,12 @@ Game.prototype.hasBlock = function(pole, block) {
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
+    }
     var cursor = this.cursorActive(playerNumber);
     cursor.selected = true;
 };
@@ -262,6 +285,12 @@ Game.prototype.activeProjectiles = function(playerNumber) {
 };
 
 Game.prototype.activateBlock = function(playerNumber) {
+    if (this.state === Game.VICTORY) {
+        if (this.stateTime > MIN_VICTORY_TIME) {
+            this.reset();
+        }
+        return;
+    }
     if (this.state == Game.START_COUNTDOWN) {
         return;
     }
@@ -363,7 +392,7 @@ Game.prototype.update = function() {
     }
     
     this.blockAppearTimer += 1/FPS;
-    if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval) {
+    if (this.blockAppearInterval > 0 && this.blockAppearTimer > this.blockAppearInterval && this.state == Game.PLAYING) {
         this.blockAppearTimer = 0;
         this.spawnNewBlocks();
         this.blockAppearInterval -= BLOCK_APPEAR_INTERVAL_REDUCE;
@@ -432,6 +461,12 @@ Game.prototype.render = function() {
             ctx.globalAlpha = 1 - this.stateTime;
             ctx.fillText('PLAY!', 0, 0);
         }
+    } else if (this.state === Game.VICTORY) {
+        ctx.scale(0.5, 0.5);
+        ctx.fillStyle = '#000';
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = '#fff';
+        ctx.fillText(this.winnersText, 0, 0);
     }
     ctx.restore();
 };
