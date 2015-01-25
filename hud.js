@@ -13,40 +13,23 @@ Game.HUD_Bars = [
 Game.prototype.drawHud = function() {
 
     //##
-    ctx.scale(1.0, 1.0);
-    ctx.fillStyle = '#ff0000';
+    ctx.save();
     ctx.shadowBlur = 1;
     ctx.shadowColor = '#000';
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 5;
     ctx.font="italic bold 36px Myriad Pro";
-    ctx.textAlign="left";
 
     var TotemWinnerX = POLE_DISTANCE_FROM_EDGE;
-    var TotemWinnerY = 761;
+    var TotemWinnerY = 771;
 
     var TotemBarX = TotemWinnerX - 125;
     var TotemBarY = 733.5;
     var count = 0;
 
+    var guiColors = ['#ff0000', '#00bcbd', '#18d122', '#dadf00'];
 
     for(var i = 0; i < this.totemPoles.length; i++) {
-        Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
-
-        if (i==0){
-            ctx.fillStyle = '#ff0000';   
-        }
-        else if (i==1){
-            ctx.fillStyle = '#00bcbd';   
-        }
-        else if (i==2){
-            ctx.fillStyle = '#18d122';   
-        }
-        else if (i==3){
-            ctx.fillStyle = '#dadf00';   
-        } 
-        ctx.textAlign="center"; 
-
         var text = "";
         if (this.state === Game.VICTORY) {
             if (this.totemPoles[i].blocks.length >= VICTORY_BLOCKS){
@@ -68,6 +51,10 @@ Game.prototype.drawHud = function() {
         } else {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
+
+        Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
+        ctx.fillStyle = guiColors[i];
+        ctx.textAlign="center";
         ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
         ctx.fillText(text, TotemWinnerX, TotemWinnerY);
 
@@ -93,49 +80,36 @@ Game.prototype.drawHud = function() {
         TotemBarX += POLE_DISTANCE;
     }
 
-
-    ctx.scale(1.0, 1.0);
+    // Centered UI
+    
+    ctx.translate(ctx.canvas.width * 0.5, 0);
     ctx.fillStyle = '#ff0000';
-    ctx.shadowBlur = 1;
-    ctx.shadowColor = '#000';
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 5;
-    ctx.font="italic bold 100px Myriad Pro";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.height * 0.35);
-    ctx.scale(ctx.canvas.width / 1200, ctx.canvas.width / 1200);
-
+    
     if (this.state === Game.CHOOSE_PLAYERS)
     {
         if( count >= MIN_PLAYERS )
         {
-                ctx.scale(1.0, 1.0);
-                ctx.fillStyle = '#ff0000';
-                ctx.shadowBlur = 1;
-                ctx.shadowColor = '#000';
-                ctx.strokeStyle = 'black';
                 ctx.lineWidth = 1;
-                ctx.font="italic bold 100px Myriad Pro";
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-
                 ctx.font="italic bold 50px Myriad Pro";
-                ctx.fillStyle = '#ff0000';
-                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, -225);
-                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, -225);
-        }
-        else
-        {
-            //draw text
+                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+        } else {
             ctx.font="italic bold 60px Myriad Pro";
-            ctx.fillStyle = '#ff0000';
-            ctx.strokeText("SUMMON YOUR TOTEM", 0, -225);
-            ctx.fillText("SUMMON YOUR TOTEM", 0, -225);
+            ctx.strokeText("SUMMON YOUR TOTEM", 0, 80);
+            ctx.fillText("SUMMON YOUR TOTEM", 0, 80);
         }
     }
+    
+
+    // UI that's scaled according to resolution:
+    
+    ctx.translate(0, ctx.canvas.height * 0.35);
+    ctx.scale(ctx.canvas.width / 1200, ctx.canvas.width / 1200);
+    
+    ctx.lineWidth = 5;
+    ctx.font="italic bold 100px Myriad Pro";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
 
     if (this.state === Game.START_COUNTDOWN) {
         var numTime = this.stateTime / START_COUNTDOWN_DURATION * 3;
@@ -150,11 +124,12 @@ Game.prototype.drawHud = function() {
             var s = this.stateTime + 1;
             ctx.scale(s, s);
             ctx.globalAlpha = 1 - this.stateTime;
-            ctx.fillText('TAKEDOWN!', 0, -225);
-            ctx.strokeText('TAKEDOWN!', 0, -225);
+            ctx.fillText('TAKEDOWN!', 0, 0);
+            ctx.strokeText('TAKEDOWN!', 0, 0);
         }
     } else if (this.state === Game.VICTORY) {
         ctx.fillText(this.winnersText, 0, 0);
         ctx.strokeText(this.winnersText, 0, 0);
     }
+    ctx.restore();
 };
