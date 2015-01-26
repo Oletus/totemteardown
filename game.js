@@ -198,7 +198,7 @@ Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex, emptyAllowe
 
 Game.prototype.spawnBlockInPole = function(i, tryIndex, emptyAllowed) {
     var pole = this.totemPoles[i];
-    if (pole.blocks.length < VICTORY_BLOCKS) {
+    if (pole.blocks.length <= VICTORY_BLOCKS) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex, emptyAllowed);
         var lastBlock = pole.blocks[pole.blocks.length - 1];
