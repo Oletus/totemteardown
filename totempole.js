@@ -34,7 +34,7 @@ TotemPole.prototype.update = function(canShoot) {
             chain = 0;
         }
         if (chain == 2 && MATCH_THREE_EMPTY) {
-            this.blocks.splice(i, 1);
+            this.blocks.splice(i, 2);
             topIndex = i - 1;
             if (topIndex >= 0 && this.blocks[topIndex].state != TotemBlock.SWAPPING) {
                 this.blocks[topIndex].state = TotemBlock.FALLING;

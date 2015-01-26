@@ -170,7 +170,10 @@ Game.prototype.clampAllCursors = function() {
     }
 };
 
-Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
+Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex, emptyAllowed) {
+    if (emptyAllowed === undefined) {
+        emptyAllowed = true;
+    }
     var decided = false;
     var leftWing = pole.blockCount(TotemBlock.Type.SHOOTLEFT);
     var rightWing = pole.blockCount(TotemBlock.Type.SHOOTRIGHT);
@@ -185,16 +188,19 @@ Game.prototype.getBlockTypeForPole = function(pole, types, tryIndex) {
         if (pole.blocks.length > 0 && pole.blocks[pole.blocks.length - 1].type == type) {
             decided = false;
         }
+        if (!emptyAllowed && type == TotemBlock.Type.EMPTY) {
+            decided = false;
+        }
         ++tryIndex;
     }
     return type;
 };
 
-Game.prototype.spawnBlockInPole = function(i, tryIndex) {
+Game.prototype.spawnBlockInPole = function(i, tryIndex, emptyAllowed) {
     var pole = this.totemPoles[i];
     if (pole.blocks.length < VICTORY_BLOCKS) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
-        var type = this.getBlockTypeForPole(pole, types, tryIndex);
+        var type = this.getBlockTypeForPole(pole, types, tryIndex, emptyAllowed);
         var lastBlock = pole.blocks[pole.blocks.length - 1];
         pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: type, state: TotemBlock.APPEARING}));
 
@@ -527,7 +533,7 @@ Game.prototype.update = function() {
         var canShoot = (this.activeProjectiles(i) < MAX_ACTIVE_PROJECTILES_PER_PLAYER);
         pole.update(canShoot);
         while (pole.spawnBlocks > 0) {
-            this.spawnBlockInPole(i, pole.spawnBlocks);
+            this.spawnBlockInPole(i, pole.spawnBlocks, false);
             pole.spawnBlocks--;
         }
     }
@@ -559,7 +565,7 @@ Game.prototype.update = function() {
 
     this.checkVictory();
 
-    plotParticles(canvas.width, canvas.height);
+    plotParticles();
 };
 
 Game.prototype.render = function() {
@@ -679,7 +685,7 @@ var resizeGame = function() {
 
 window.addEventListener('resize', resizeGame, false);
 
-var plotParticles = function(boundsX, boundsY) {
+var plotParticles = function() {
     for (var i = 0; i < game.particles.length;) {
         var particle = game.particles[i];
         particle.move();
