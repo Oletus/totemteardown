@@ -1,7 +1,7 @@
 # totemteardown
 GGJ 2015 game
 
-Play now: http://oletus.github.io/totemteardown/index.html (includes post-jam fixes)
+Play now: http://oletus.github.io/totemteardown/index.html (Chrome recommended, includes post-jam fixes)
 
 ## Game Play
 *Objective:*  Reach the top with your totem before the other player's totems.
