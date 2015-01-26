@@ -259,52 +259,6 @@ TotemBlock.prototype.render = function(color) {
             }
         }
     }
-    // Commented: debug draw mode
-    /*ctx.fillStyle = color;
-    canvasUtil.fillCenteredRect(ctx, this.x, this.y, this.width, this.height);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 3;
-    canvasUtil.strokeCenteredRect(ctx, this.x, this.y, this.width, this.height);
-    ctx.fillStyle = 'black';
-    
-    ctx.beginPath();
-    if (this.type === TotemBlock.Type.SHOOTLEFT) {
-        ctx.moveTo(this.x - 10, this.y - 10);
-        ctx.lineTo(this.x - 10, this.y + 10);
-        ctx.lineTo(this.x - 20, this.y);
-        ctx.lineTo(this.x - 10, this.y - 10);
-    }
-    if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-        ctx.moveTo(this.x + 10, this.y - 10);
-        ctx.lineTo(this.x + 10, this.y + 10);
-        ctx.lineTo(this.x + 20, this.y);
-        ctx.lineTo(this.x + 10, this.y - 10);
-    }
-    if (this.type === TotemBlock.Type.SHIELD) {
-        ctx.save();
-        if (!BLOCK_BOTH_DIRECTIONS) {
-            if (this.facingLeft) {
-                ctx.translate(-10, 0);
-            } else {
-                ctx.translate(10, 0);
-            }
-        }
-        ctx.moveTo(this.x + 10, this.y - 10);
-        ctx.lineTo(this.x + 10, this.y + 10);
-        ctx.lineTo(this.x - 10, this.y + 10);
-        ctx.lineTo(this.x - 10, this.y - 10);
-        ctx.lineTo(this.x + 10, this.y - 10);
-        ctx.restore();
-    }
-    if (this.type === TotemBlock.Type.JUMP) {
-        ctx.moveTo(this.x + 10, this.y + 15);
-        ctx.lineTo(this.x + 10, this.y + 10);
-        ctx.lineTo(this.x - 10, this.y + 10);
-        ctx.lineTo(this.x - 10, this.y + 15);
-        ctx.lineTo(this.x + 10, this.y + 15);
-    }
-    ctx.fill();*/
-    //ctx.fillText(this.state, this.x - 15, this.y - 12);
 };
 
 /**
