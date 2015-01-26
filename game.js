@@ -203,19 +203,12 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex) {
     }
 };
 
-Game.prototype.spawnNewBlocks = function() {
-    for (var i = 0; i < this.totemPoles.length; ++i) {
-        this.spawnBlockInPole(i, this.appearPhase);
-        if (this.totemPoles[i].blocks.length < 7) {
-            this.spawnBlockInPole(i, this.appearPhase);
-        }
-    }
-
+Game.prototype.checkVictory = function() {
     this.winnersText = [];
     for (var i = 0; i < this.totemPoles.length; ++i) {
         var pole = this.totemPoles[i];
         var lastBlock = pole.blocks[pole.blocks.length - 1];
-        if (pole.blocks.length >= VICTORY_BLOCKS && lastBlock.state == TotemBlock.APPEARING) {
+        if (pole.blocks.length > VICTORY_BLOCKS && lastBlock.state != TotemBlock.APPEARING) {
             var lastBlock = pole.blocks[pole.blocks.length - 1];
             if (lastBlock.type !== TotemBlock.Type.THRUSTER) {
                 pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: TotemBlock.Type.THRUSTER, state: TotemBlock.THRUSTING}));
@@ -229,6 +222,17 @@ Game.prototype.spawnNewBlocks = function() {
     }
     if (this.state === Game.VICTORY) {
         this.winnersText = 'CONGRATS, ' + this.winnersText.join(', ') + '!';
+    } else {
+        this.winnersText = '';
+    }
+};
+
+Game.prototype.spawnNewBlocks = function() {
+    for (var i = 0; i < this.totemPoles.length; ++i) {
+        this.spawnBlockInPole(i, this.appearPhase);
+        if (this.totemPoles[i].blocks.length < 7) {
+            this.spawnBlockInPole(i, this.appearPhase);
+        }
     }
 
     Game.backgroundMusic.volume = 0.01;
@@ -552,6 +556,8 @@ Game.prototype.update = function() {
             }
         }
     }
+
+    this.checkVictory();
 
     plotParticles(canvas.width, canvas.height);
 };
