@@ -11,8 +11,6 @@ Game.HUD_Bars = [
 ];
 
 Game.prototype.drawHud = function() {
-
-    //##
     ctx.save();
     ctx.shadowBlur = 1;
     ctx.shadowColor = '#000';
@@ -20,16 +18,16 @@ Game.prototype.drawHud = function() {
     ctx.lineWidth = 5;
     ctx.font="italic bold 36px Myriad Pro";
 
-    var TotemWinnerX = POLE_DISTANCE_FROM_EDGE;
-    var TotemWinnerY = 771;
+    var TotemTextX = POLE_DISTANCE_FROM_EDGE;
+    var TotemTextY = 771;
 
-    var TotemBarX = TotemWinnerX - 125;
+    var TotemBarX = TotemTextX - 125;
     var TotemBarY = 733.5;
     var count = 0;
 
     var guiColors = ['#ff0000', '#00bcbd', '#18d122', '#dadf00'];
 
-    for(var i = 0; i < this.totemPoles.length; i++) {
+    for (var i = 0; i < this.totemPoles.length; i++) {
         var text = "";
         if (this.state === Game.VICTORY) {
             if (this.totemPoles[i].blocks.length >= VICTORY_BLOCKS){
@@ -52,33 +50,34 @@ Game.prototype.drawHud = function() {
             text = "TOTEMS:   " + this.totemPoles[i].blocks.length;
         }
 
+        ctx.fillStyle = guiColors[i];
         if (text !== '') {
             Game.HUD_Bars[i].draw(ctx, TotemBarX, TotemBarY);
-            ctx.fillStyle = guiColors[i];
             ctx.textAlign="center";
-            ctx.strokeText(text, TotemWinnerX, TotemWinnerY);
-            ctx.fillText(text, TotemWinnerX, TotemWinnerY);
+            canvasUtil.strokeAndFillText(ctx, text, TotemTextX, TotemTextY);
         }
 
         if (this.state === Game.CHOOSE_PLAYERS) {
+            // Draw P1 etc. over player totem
             var ptext = 'P' + (i + 1);
             var PNy = this.totemPoles[i].blocks[0].y - 130;
             ctx.save();
             ctx.translate(0, Math.sin(this.stateTime * 2) * 10);
-            ctx.strokeText(ptext, TotemWinnerX, PNy);
-            ctx.fillText(ptext, TotemWinnerX, PNy);
+            canvasUtil.strokeAndFillText(ctx, ptext, TotemTextX, PNy);
+            
+            // Draw player triangle
             ctx.translate(0, 25);
             ctx.beginPath();
-            ctx.moveTo(TotemWinnerX, PNy + 10);
-            ctx.lineTo(TotemWinnerX + 10, PNy);
-            ctx.lineTo(TotemWinnerX - 10, PNy);
+            ctx.moveTo(TotemTextX, PNy + 10);
+            ctx.lineTo(TotemTextX + 10, PNy);
+            ctx.lineTo(TotemTextX - 10, PNy);
             ctx.closePath();
             ctx.stroke();
             ctx.fill();
             ctx.restore();
         }
 
-        TotemWinnerX += POLE_DISTANCE;
+        TotemTextX += POLE_DISTANCE;
         TotemBarX += POLE_DISTANCE;
     }
 
@@ -91,20 +90,17 @@ Game.prototype.drawHud = function() {
     {
         if( count >= MIN_PLAYERS )
         {
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 4;
             ctx.font="italic bold 50px Myriad Pro";
             if (Math.sin(this.stateTime * 2.0) > 0) {
-                ctx.fillText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
-                ctx.strokeText('PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+                canvasUtil.strokeAndFillText(ctx, 'PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
             }
         } else {
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 4;
             ctx.font="italic bold 50px Myriad Pro";
-            ctx.strokeText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
-            ctx.fillText("SUMMON YOUR TOTEM USING YOUR GAMEPAD", 0, 55);
+            canvasUtil.strokeAndFillText(ctx, 'SUMMON YOUR TOTEM USING YOUR GAMEPAD', 0, 55);
             ctx.font="italic bold 40px Myriad Pro";
-            ctx.strokeText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
-            ctx.fillText("HOLD Y FOR DETAILED INSTRUCTIONS", 0, 105);
+            canvasUtil.strokeAndFillText(ctx, 'HOLD Y FOR DETAILED INSTRUCTIONS', 0, 105);
         }
     }
     
@@ -123,12 +119,8 @@ Game.prototype.drawHud = function() {
         var numTime = this.stateTime / PRE_COUNTDOWN_DURATION;
         var s = 1.3 - numTime * 0.3;
         ctx.scale(s, s);
-        var txt = 'BE THE FIRST';
-        ctx.fillText(txt, 0, -50);
-        ctx.strokeText(txt, 0, -50);
-        var txt2 = 'TO REACH THE TOP';
-        ctx.fillText(txt2, 0, 50);
-        ctx.strokeText(txt2, 0, 50);
+        canvasUtil.strokeAndFillText(ctx, 'BE THE FIRST', 0, -50);
+        canvasUtil.strokeAndFillText(ctx, 'TO REACH THE TOP', 0, 50);
     } else if (this.state === Game.START_COUNTDOWN) {
         var NUM_TIME_STEPS = 3;
         var numTime = this.stateTime / START_COUNTDOWN_DURATION * NUM_TIME_STEPS;
@@ -136,23 +128,19 @@ Game.prototype.drawHud = function() {
         var num = NUM_TIME_STEPS - Math.floor(numTime);
         var s = 1.6 - currentNumberTime * 0.6;
         ctx.scale(s, s);
-        ctx.fillText(num, 0, 0);
-        ctx.strokeText(num, 0, 0);
+        canvasUtil.strokeAndFillText(ctx, num, 0, 0);
     } else if (this.state === Game.PLAYING) {
         if (this.stateTime < 1) {
             var s = this.stateTime + 1;
             ctx.scale(s, s);
             ctx.globalAlpha = 1 - this.stateTime;
-            ctx.fillText('TAKEDOWN!', 0, 0);
-            ctx.strokeText('TAKEDOWN!', 0, 0);
+            canvasUtil.strokeAndFillText(ctx, 'TAKEDOWN!', 0, 0);
         }
     } else if (this.state === Game.VICTORY) {
-        ctx.fillText(this.winnersText, 0, -50);
-        ctx.strokeText(this.winnersText, 0, -50);
+        canvasUtil.strokeAndFillText(ctx, this.winnersText, 0, -50);
         if (this.stateTime > MIN_VICTORY_TIME) {
             if (Math.sin(this.stateTime * 2.0) > 0) {
-                ctx.fillText('PRESS START TO RESET', 0, 50);
-                ctx.strokeText('PRESS START TO RESET', 0, 50);
+                canvasUtil.strokeAndFillText(ctx, 'PRESS START TO RESET', 0, 50);
             }
         }
     }

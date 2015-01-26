@@ -1251,3 +1251,8 @@ canvasUtil.fillCenteredRect = function(ctx, x, y, w, h) {
 canvasUtil.strokeCenteredRect = function(ctx, x, y, w, h) {
     ctx.strokeRect(x - w * 0.5, y - h * 0.5, w, h);
 };
+
+canvasUtil.strokeAndFillText = function(ctx, text, x, y) {
+    ctx.strokeText(text, x, y);
+    ctx.fillText(text, x, y);
+};
