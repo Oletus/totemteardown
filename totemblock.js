@@ -156,24 +156,16 @@ TotemBlock.typeFromChar = function(char, leftWingAdvantage) {
     }
 };
 
-TotemBlock.SEED = 0;
-
-TotemBlock.randomType = function() {
-    TotemBlock.SEED = (TotemBlock.SEED + 1) % 5;
-    return TotemBlock.SEED;
-    //return Math.floor(Math.random() * (5 - 0.00001)); // types 0 to 4
-};
-
 TotemBlock.prototype.update = function(supportedLevel) {
     this.timeExisted += 1/FPS;
     this.sinceActivation += 1/FPS;
     if (this.state == TotemBlock.APPEARING) {
         if (this.y > supportedLevel) {
             this.y -= SWAP_SPEED * 0.5;
-            if (this.y <= supportedLevel) {
-                this.y = supportedLevel;
-                this.state = TotemBlock.SUPPORTED;
-            }
+        }
+        if (this.y <= supportedLevel) {
+            this.y = supportedLevel;
+            this.state = TotemBlock.SUPPORTED;
         }
     } else if (this.state == TotemBlock.SWAPPING) {
         if (this.y < supportedLevel) {
@@ -192,9 +184,7 @@ TotemBlock.prototype.update = function(supportedLevel) {
     } else if (this.state == TotemBlock.SUPPORTED) {
         if (this.y < supportedLevel - FALL_SPEED - 0.1) {
             this.state = TotemBlock.FALLING;
-        } else if (this.y < supportedLevel) {
-            this.y = supportedLevel;
-        } else if (this.y > supportedLevel) {
+        } else {
             this.y = supportedLevel;
         }
     } else if (this.state == TotemBlock.THRUSTING) {
