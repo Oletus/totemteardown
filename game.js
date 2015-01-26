@@ -202,7 +202,8 @@ Game.prototype.spawnBlockInPole = function(i, tryIndex, emptyAllowed) {
         var types = APPEAR_TYPES[i % APPEAR_TYPES.length];
         var type = this.getBlockTypeForPole(pole, types, tryIndex, emptyAllowed);
         var lastBlock = pole.blocks[pole.blocks.length - 1];
-        pole.blocks.push(new TotemBlock({x: pole.x, y: lastBlock.y + BLOCK_HEIGHT, type: type, state: TotemBlock.APPEARING}));
+        var blockY = Math.max(lastBlock.y + BLOCK_HEIGHT, pole.y + BLOCK_HEIGHT * 0.5);
+        pole.blocks.push(new TotemBlock({x: pole.x, y: blockY, type: type, state: TotemBlock.APPEARING}));
 
         //game.emitters.push(new Emitter(new Vector(this.totemPoles[i].x, GROUND_LEVEL), Vector.fromAngle(4.7, 2), 1.8));
         //game.fields.push(new Field(new Vector(this.totemPoles[i].x, GROUND_LEVEL)), 1540);
