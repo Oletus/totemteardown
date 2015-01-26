@@ -52,6 +52,32 @@ Game.prototype.reset = function() {
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
     this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.Y, this.showInstructions, this.hideInstructions);
+
+    var that = this;
+    Mousetrap.bindGlobal('down', function() {
+        that.moveCursorDown(0);
+    }, 'keydown');
+    Mousetrap.bindGlobal('up', function() {
+        that.moveCursorUp(0);
+    }, 'keydown');
+    Mousetrap.bindGlobal('a', function() {
+        that.selectBlock(0);
+    }, 'keydown');
+    Mousetrap.bindGlobal('a', function() {
+        that.deselectBlock(0);
+    }, 'keyup');
+    Mousetrap.bindGlobal('x', function() {
+        that.activateBlock(0);
+    }, 'keydown');
+    Mousetrap.bindGlobal('enter', function() {
+        that.start(0);
+    }, 'keydown');
+    /*Mousetrap.bindGlobal('y', function() {
+        that.showInstructions(0);
+    }, 'keydown');
+    Mousetrap.bindGlobal('y', function() {
+        that.hideInstructions(0);
+    }, 'keyup');*/
     //addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
@@ -668,3 +694,4 @@ var drawParticles = function() {
         ctx.fillRect(position.x, position.y, PARTICLE_SIZE * part.scale(), PARTICLE_SIZE * part.scale());
     }
 };
+
