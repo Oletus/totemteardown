@@ -1,8 +1,11 @@
+"use strict";
+
 var FPS = 60;
 
 var canvas;
 var ctx;
 var game;
+var nextFrameTime;
 
 var Game = function() {
     this.reset();
@@ -660,7 +663,7 @@ var resizeGame = function() {
     if (game && game.totemPoles.length > 0) {
         poles = game.totemPoles.length;
     }
-    screenWidthForPlayerCount = (poles - 1) * POLE_DISTANCE + 2 * POLE_DISTANCE_FROM_EDGE;
+    var screenWidthForPlayerCount = (poles - 1) * POLE_DISTANCE + 2 * POLE_DISTANCE_FROM_EDGE;
     var widthToHeight = screenWidthForPlayerCount / SCREEN_HEIGHT;
     var newWidth = window.innerWidth;
     var newHeight = window.innerHeight;

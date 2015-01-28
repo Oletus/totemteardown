@@ -1,3 +1,5 @@
+"use strict";
+
 var TotemBlock = function(options) {
     var defaults = {
         x: 0,
