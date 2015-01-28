@@ -7,7 +7,8 @@ var ctx;
 var game;
 var nextFrameTime;
 
-var Game = function() {
+var Game = function(debugMode) {
+    this.debugMode = debugMode || false;
     this.reset();
 };
 
@@ -81,7 +82,6 @@ Game.prototype.reset = function() {
     Mousetrap.bindGlobal('y', function() {
         that.hideInstructions(0);
     }, 'keyup');*/
-    //addEventListener("keydown", this.debugMode, false);
 
     if(SOUND_ON) {
         Game.longIntroSound.playClone();
@@ -89,7 +89,11 @@ Game.prototype.reset = function() {
     }
     
     this.winnersText = undefined;
-    
+
+    var debugPanel = document.getElementById("debug");
+
+    this.debugMode ? debugPanel.style.display = 'block' : debugPanel.style.display = 'none';
+
     resizeGame();
 };
 
@@ -125,23 +129,6 @@ Game.prototype.showInstructions = function(playerNumber) {
 
 Game.prototype.hideInstructions = function(playerNumber) {
     this.instructionsRequested -= 1;
-};
-
-Game.prototype.debugMode = function(e) {
-
-
-    var debugPanel = document.getElementById("debug");
-
-    if(e.keyCode === 68) {
-        if(!DEBUG_MODE) {
-            DEBUG_MODE = true;
-            debugPanel.style.display = 'block';
-        } else {
-            DEBUG_MODE = false;
-            debugPanel.style.display = 'none';
-        }
-    }
-
 };
 
 Game.prototype.cursorActive = function(playerNumber) {
@@ -639,14 +626,14 @@ var webFrame = function() {
 };
 
 
-var initGame = function() {
+var initGame = function(debugMode) {
     canvas = document.getElementById('totemGame');
 
     resizeGame();
 
     ctx = canvas.getContext('2d');
 
-    game = new Game();
+    game = new Game(debugMode);
 
     game.midX = ctx.canvas.width / 2;
     game.midY = ctx.canvas.height / 2;
