@@ -56,7 +56,7 @@ InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex)
  * @param {function} upCallback Callback when the button is released, that takes a player number as a parameter.
  */
 InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, downCallback, upCallback) {
-    var gamepadDownCallback = function(playerNumber) {
+    var gamepadDownCallback = function(gamepadNumber) {
         var player = this.getPlayerIndex(InputMapper.GAMEPAD, gamepadNumber);
         if (downCallback !== undefined) {
             downCallback.call(this.callbackObj, player);
