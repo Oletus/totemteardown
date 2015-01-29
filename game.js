@@ -46,42 +46,16 @@ Game.prototype.reset = function() {
         this.cursors.push(new Cursor({block: this.totemPoles[i].blocks.length - 1, pole: i}));
     }
 
-    this.gamepads = new Gamepads(this);
+    this.inputMapper = new InputMapper(this, 4);
 
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.DOWN, this.moveCursorDown);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.UP, this.moveCursorUp);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.LEFT, this.cursorLeft);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.RIGHT, this.cursorRight);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.A, this.selectBlock, this.deselectBlock);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.X, this.activateBlock);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.START, this.start);
-    this.gamepads.addButtonChangeListener(Gamepads.BUTTONS.Y, this.showInstructions, this.hideInstructions);
-
-    var that = this;
-    Mousetrap.bindGlobal('down', function() {
-        that.moveCursorDown(0);
-    }, 'keydown');
-    Mousetrap.bindGlobal('up', function() {
-        that.moveCursorUp(0);
-    }, 'keydown');
-    Mousetrap.bindGlobal('a', function() {
-        that.selectBlock(0);
-    }, 'keydown');
-    Mousetrap.bindGlobal('a', function() {
-        that.deselectBlock(0);
-    }, 'keyup');
-    Mousetrap.bindGlobal('x', function() {
-        that.activateBlock(0);
-    }, 'keydown');
-    Mousetrap.bindGlobal('enter', function() {
-        that.start(0);
-    }, 'keydown');
-    /*Mousetrap.bindGlobal('y', function() {
-        that.showInstructions(0);
-    }, 'keydown');
-    Mousetrap.bindGlobal('y', function() {
-        that.hideInstructions(0);
-    }, 'keyup');*/
+    this.inputMapper.addListener(Gamepads.BUTTONS.DOWN, ['down', 's'], this.moveCursorDown);
+    this.inputMapper.addListener(Gamepads.BUTTONS.UP, ['up', 'w'], this.moveCursorUp);
+    this.inputMapper.addListener(Gamepads.BUTTONS.LEFT, ['left', 'a'], this.cursorLeft);
+    this.inputMapper.addListener(Gamepads.BUTTONS.RIGHT, ['right', 'd'], this.cursorRight);
+    this.inputMapper.addListener(Gamepads.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
+    this.inputMapper.addListener(Gamepads.BUTTONS.X, ['p', '2'], this.activateBlock);
+    this.inputMapper.addListener(Gamepads.BUTTONS.START, ['enter'], this.start);
+    this.inputMapper.addListener(Gamepads.BUTTONS.Y, [/*'y'*/], this.showInstructions, this.hideInstructions);
 
     if(SOUND_ON) {
         Game.longIntroSound.playClone();
@@ -501,7 +475,7 @@ Game.prototype.killBlocks = function(killBox, obj) {
 // This runs at fixed 60 FPS
 Game.prototype.update = function() {
     var i;
-    this.gamepads.update();
+    this.inputMapper.update();
 
     this.stateTime += 1/FPS;
 
