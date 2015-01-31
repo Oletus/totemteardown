@@ -9,6 +9,7 @@ var nextFrameTime;
 
 var Game = function(debugMode) {
     this.debugMode = debugMode || false;
+    this.minPlayers = this.debugMode ? 1 : MIN_PLAYERS;
     this.reset();
 };
 
@@ -231,7 +232,7 @@ Game.prototype.start = function() {
             ++activePlayers;
         }
     }
-    if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= MIN_PLAYERS) {
+    if (this.state == Game.CHOOSE_PLAYERS && activePlayers >= this.minPlayers) {
         this.state = Game.PRE_COUNTDOWN;
         this.stateTime = 0;
         for (var i = 0; i < this.totemPoles.length;) {
@@ -672,3 +673,4 @@ var drawParticles = function() {
     }
 };
 
+f

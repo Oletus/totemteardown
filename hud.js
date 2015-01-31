@@ -88,7 +88,7 @@ Game.prototype.drawHud = function() {
     
     if (this.state === Game.CHOOSE_PLAYERS)
     {
-        if( count >= MIN_PLAYERS )
+        if (count >= this.minPlayers)
         {
             ctx.lineWidth = 4;
             ctx.font="italic bold 50px Myriad Pro";
