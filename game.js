@@ -273,7 +273,6 @@ Game.prototype.swap = function(pole, blockA, blockB) {
 };
 
 Game.prototype.playSwapSound = function(pole) {
-    console.log(pole);
     switch(pole) {
         case 0:
             Game.player1Switch.playClone();
