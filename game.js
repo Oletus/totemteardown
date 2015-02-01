@@ -96,6 +96,11 @@ Game.shieldSound = new Audio('shield', false);
 Game.thunderSound = new Audio('thunder', false);
 Game.longIntroSound = new Audio('longintro', false);
 
+Game.player1Switch = new Audio('switch1', false);
+Game.player2Switch = new Audio('switch2', false);
+Game.player3Switch = new Audio('switch3', false);
+Game.player4Switch = new Audio('switch4', false);
+
 Game.xSprite = new Sprite('button_x.png');
 
 Game.prototype.showInstructions = function(playerNumber) {
@@ -258,11 +263,32 @@ Game.prototype.swap = function(pole, blockA, blockB) {
             poleObj.blocks.splice(blockB, 1, a);
             a.state = TotemBlock.SWAPPING;
             b.state = TotemBlock.SWAPPING;
+            this.playSwapSound(pole);
             return true;
         }
         return false;
     } else {
         return false;
+    }
+};
+
+Game.prototype.playSwapSound = function(pole) {
+    console.log(pole);
+    switch(pole) {
+        case 0:
+            Game.player1Switch.playClone();
+            break;
+        case 1:
+            Game.player2Switch.playClone();
+            break;
+        case 2:
+            Game.player3Switch.playClone();
+            break;
+        case 3:
+            Game.player4Switch.playClone();
+            break;
+        default:
+            break;
     }
 };
 
@@ -672,5 +698,3 @@ var drawParticles = function() {
         ctx.fillRect(position.x, position.y, PARTICLE_SIZE * part.scale(), PARTICLE_SIZE * part.scale());
     }
 };
-
-f
