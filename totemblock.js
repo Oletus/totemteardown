@@ -27,6 +27,8 @@ var TotemBlock = function(options) {
     this.woodSound = new Audio('wood', false);
     this.eagleRoar = new Audio('eagle', false);
     this.swooshSound = new Audio('swoosh', false);
+    this.fireCount = 0;
+    this.maxFireCount = 3;
 };
 
 TotemBlock.SUPPORTED = 0;
@@ -274,18 +276,22 @@ TotemBlock.prototype.activate = function(playerNumber) {
         }
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
-        if(SOUND_ON) {
-            this.eagleRoar.play();
-        }
+        this.playEagleRoar();
         return [new Projectile({x: this.x - this.width * 0.5 - 10, y: this.y, velX: -SHOT_SPEED, shooter: playerNumber})];
     }
     if (this.type === TotemBlock.Type.SHOOTRIGHT) {
-        if(SOUND_ON) {
-            this.eagleRoar.play();
-        }
+        this.playEagleRoar();
         return [new Projectile({x: this.x + this.width * 0.5 + 10, y: this.y, velX: SHOT_SPEED, shooter: playerNumber})];
     }
     return [];
+};
+
+TotemBlock.prototype.playEagleRoar = function() {
+    this.fireCount++;
+    if(SOUND_ON && this.fireCount === this.maxFireCount) {
+        this.eagleRoar.play();
+        this.fireCount = 0;
+    }
 };
 
 TotemBlock.prototype.canBeActivated = function() {
