@@ -11,7 +11,8 @@ var InputMapper = function(callbackObj, maxPlayers) {
     this.callbackObj = callbackObj;
     this.maxPlayers = maxPlayers;
     this.players = [];
-    this.callbacks = [];
+    this.keysDown = []; // Keyboard keys that are currently down
+    this.callbacks = []; // Callback information for mapping callbacks back to buttons
 };
 
 // Controller types
@@ -81,15 +82,20 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     var that = this;
     for (var i = 0; i < keyboardButtons.length; ++i) {
         (function(kbIndex) {
+            that.keysDown[keyboardButtons[kbIndex]] = false;
             // TODO: down events get generated multiple times while a key is down. Work around this...
             var keyDownCallback = function() {
                 var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
-                if (downCallback !== undefined) {
-                    downCallback.call(that.callbackObj, player);
+                if (!that.keysDown[keyboardButtons[kbIndex]]) {
+                    that.keysDown[keyboardButtons[kbIndex]] = true;
+                    if (downCallback !== undefined) {
+                        downCallback.call(that.callbackObj, player);
+                    }
                 }
             };
             var keyUpCallback = function() {
                 var player = that.getPlayerIndex(InputMapper.KEYBOARD, kbIndex);
+                that.keysDown[keyboardButtons[kbIndex]] = false;
                 if (upCallback !== undefined) {
                     upCallback.call(that.callbackObj, player);
                 }

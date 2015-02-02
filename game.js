@@ -56,7 +56,7 @@ Game.prototype.reset = function() {
     this.inputMapper.addListener(Gamepads.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
     this.inputMapper.addListener(Gamepads.BUTTONS.X, ['p', '2'], this.activateBlock);
     this.inputMapper.addListener(Gamepads.BUTTONS.START, ['enter'], this.start);
-    this.inputMapper.addListener(Gamepads.BUTTONS.Y, [/*'y'*/], this.showInstructions, this.hideInstructions);
+    this.inputMapper.addListener(Gamepads.BUTTONS.Y, ['y'], this.showInstructions, this.hideInstructions);
 
     if(SOUND_ON) {
         Game.longIntroSound.playClone();
