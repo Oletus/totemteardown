@@ -14,6 +14,27 @@ Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
     return null;
 };
 
+/**
+ * @protected
+ */
+Gamepads.prototype.markDownAndCallback = function(l, p, value) {
+    if (value > 0.6) {
+        if (!l.isDown[p]) {
+            l.isDown[p] = true;
+            if (l.callback !== undefined) {
+                l.callback.call(this.callbackObj, p);
+            }
+        }
+    } else if (value < 0.1) {
+        if (l.isDown[p]) {
+            l.isDown[p] = false;
+            if (l.callbackUp !== undefined) {
+                l.callbackUp.call(this.callbackObj, p);
+            }
+        }
+    }
+};
+
 Gamepads.prototype.update = function() {
     var gamepads;
     if (navigator.getGamepads) {
@@ -37,25 +58,24 @@ Gamepads.prototype.update = function() {
             var pad = this.gamepadForPlayer(gamepads, p);
             if (pad != null) {
                 var value;
-                if (pad.buttons[l.buttonNumber].hasOwnProperty('value')) {
-                    value = pad.buttons[l.buttonNumber].value;
-                } else {
-                    value = pad.buttons[l.buttonNumber];
+                var buttonNumber = l.buttonNumber;
+                if (l.buttonNumber > 100) {
+                    buttonNumber -= 100;
                 }
-                if (value > 0.6) {
-                    if (!l.isDown[p]) {
-                        l.isDown[p] = true;
-                        if (l.callback !== undefined) {
-                            l.callback.call(this.callbackObj, p);
-                        }
+                if (pad.buttons[buttonNumber].hasOwnProperty('value')) {
+                    value = pad.buttons[buttonNumber].value;
+                } else {
+                    value = pad.buttons[buttonNumber];
+                }
+                this.markDownAndCallback(l, p, value);
+                if (l.buttonNumber > 100) {
+                    var axis = (l.buttonNumber <= Gamepads.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
+                    var value = pad.axes[axis];
+                    // positive values are down/right, negative up/left
+                    if (l.buttonNumber % 2 === Gamepads.BUTTONS.UP_OR_ANALOG_UP % 2) {
+                        value = -value;
                     }
-                } else if (value < 0.1) {
-                    if (l.isDown[p]) {
-                        l.isDown[p] = false;
-                        if (l.callbackUp !== undefined) {
-                            l.callbackUp.call(this.callbackObj, p);
-                        }
-                    }
+                    this.markDownAndCallback(l, p, value);
                 }
             }
         }
@@ -82,7 +102,11 @@ Gamepads.BUTTONS = {
   UP: 12, // Directional (discrete) pad
   DOWN: 13,
   LEFT: 14,
-  RIGHT: 15
+  RIGHT: 15,
+  UP_OR_ANALOG_UP: 112,
+  DOWN_OR_ANALOG_DOWN: 113,
+  LEFT_OR_ANALOG_LEFT: 114,
+  RIGHT_OR_ANALOG_RIGHT: 115
 };
 
 Gamepads.BUTTON_INSTRUCTION = [
