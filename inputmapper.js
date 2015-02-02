@@ -10,7 +10,7 @@ var InputMapper = function(callbackObj, maxPlayers) {
     this.gamepads = new Gamepads(this);
     this.callbackObj = callbackObj;
     this.maxPlayers = maxPlayers;
-    this.players = [];
+    this.resetPlayerMap();
     this.keysDown = []; // Keyboard keys that are currently down
     this.callbacks = []; // Callback information for mapping callbacks back to buttons
 };
@@ -22,16 +22,20 @@ InputMapper.KEYBOARD = 1;
 /**
  * Helper class to store the controller config each player has.
  */
-InputMapper.Player = function(controllerType, controllerIndex) {
+InputMapper.Controller = function(controllerType, controllerIndex) {
     this.controllerType = controllerType;
     this.controllerIndex = controllerIndex;
+    this.lastUsed = 0; // A timestamp for when this controller was last used
 };
 
 /**
  * Reset the map between controllers and player numbers.
  */
 InputMapper.prototype.resetPlayerMap = function() {
-    this.players = [];
+    this.players = []; // An array of arrays of controllers
+    for (var i = 0; i < this.maxPlayers; ++i) {
+        this.players.push([]);
+    }
 };
 
 InputMapper.prototype.update = function() {
@@ -44,13 +48,42 @@ InputMapper.prototype.update = function() {
 InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex) {
     for (var i = 0; i < this.players.length; ++i) {
         var player = this.players[i];
-        if (player.controllerType == controllerType && player.controllerIndex == controllerIndex) {
-            return i % this.maxPlayers;
+        for (var j = 0; j < player.length; ++j) {
+            if (player[j].controllerType == controllerType && player[j].controllerIndex == controllerIndex) {
+                player[j].lastUsed = Date.now();
+                return i;
+            }
         }
     }
-    this.players.push(new InputMapper.Player(controllerType, controllerIndex));
-    return (this.players.length - 1) % this.maxPlayers;
-}
+    var controller = new InputMapper.Controller(controllerType, controllerIndex);
+    controller.lastUsed = Date.now();
+    // Map the controller for a player without a controller if there is one
+    for (var i = 0; i < this.players.length; ++i) {
+        var player = this.players[i];
+        if (player.length === 0) {
+            player.push(controller);
+            return i;
+        }
+    }
+    // Map the controller for the first player without this type of a controller
+    for (var i = 0; i < this.players.length; ++i) {
+        var player = this.players[i];
+        var hasSameTypeController = false;
+        for (var j = 0; j < player.length; ++j) {
+            if (player[j].controllerType == controllerType) {
+                hasSameTypeController = true;
+            }
+        }
+        if (!hasSameTypeController) {
+            player.push(controller);
+            return i;
+        }
+    }
+    // Just map the controller for the first player
+    this.players[0].push(controller);
+    return 0;
+};
+
 /**
  * @param {number} gamepadButton A button from Gamepads.BUTTONS
  * @param {Array} keyboardBindings List of bindings for different players, for example ['up', 'w']
@@ -112,14 +145,27 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     }
 };
 
-InputMapper.usesController = function(player, cbInfo) {
-    if (cbInfo.controllerType === player.controllerType) {
-        if (cbInfo.controllerType === InputMapper.KEYBOARD && player.controllerIndex !== cbInfo.kbIndex) {
+InputMapper.usesController = function(controller, cbInfo) {
+    if (cbInfo.controllerType === controller.controllerType) {
+        if (cbInfo.controllerType === InputMapper.KEYBOARD && controller.controllerIndex !== cbInfo.kbIndex) {
             return false;
         }
         return true;
     }
 };
+
+InputMapper.prototype.getLastUsedController = function(player) {
+    var controller;
+    var lastUsed = 0;
+    for (var j = 0; j < player.length; ++j) {
+        if (player[j].lastUsed > lastUsed) {
+            controller = player[j];
+            lastUsed = player[j].lastUsed;
+        }
+    }
+    return controller;
+};
+
 /**
  * Get instruction for a key. Prioritizes gamepad over keyboard if keyboard hasn't been used.
  * @param {function} callback A callback that has been previously attached to a button.
@@ -127,33 +173,45 @@ InputMapper.usesController = function(player, cbInfo) {
  * @return {string} String identifying the button for the player.
  */
 InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
-    // TODO: Handle a player with two active controllers.
-    var player;
+    var controller;
     if (playerIndex !== undefined) {
-        if (playerIndex < this.players.length) {
-            player = this.players[playerIndex];
+        if (this.players[playerIndex].length > 0) {
+            controller = this.getLastUsedController(this.players[playerIndex]);
         } else {
-            player = new InputMapper.Player(InputMapper.GAMEPAD, 0);
+            // Gamepad instructions by default
+            controller = new InputMapper.Controller(InputMapper.GAMEPAD, 0);
         }
     }
     var returnStr = [];
     for (var i = 0; i < this.callbacks.length; ++i) {
         var cbInfo = this.callbacks[i];
         if (cbInfo.callback === callback) {
-            if (player === undefined) {
+            if (controller === undefined) {
+                // Determine all keys mapped to that callback from different controllers
                 for (var j = 0; j < this.players.length; ++j) {
-                    if (InputMapper.usesController(this.players[j], cbInfo)) {
-                        returnStr.push(cbInfo.key.toUpperCase());
+                    for (var k = 0; k < this.players[j].length; ++k) {
+                        if (InputMapper.usesController(this.players[j][k], cbInfo)) {
+                            var hasInstruction = false;
+                            var instruction = cbInfo.key.toUpperCase();
+                            for (var l = 0; l < returnStr.length; ++l) {
+                                if (returnStr[l] == instruction) {
+                                    hasInstruction = true;
+                                }
+                            }
+                            if (!hasInstruction) {
+                                returnStr.push(instruction);
+                            }
+                        }
                     }
                 }
             } else {
-                if (InputMapper.usesController(player, cbInfo)) {
+                if (InputMapper.usesController(controller, cbInfo)) {
                     return cbInfo.key.toUpperCase();
                 }
             }
         }
     }
-    if (player === undefined) {
+    if (controller === undefined) {
         return returnStr.join('/');
     }
     return '';
