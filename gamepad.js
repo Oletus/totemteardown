@@ -84,3 +84,22 @@ Gamepads.BUTTONS = {
   LEFT: 14,
   RIGHT: 15
 };
+
+Gamepads.BUTTON_INSTRUCTION = [
+    'A',
+    'B',
+    'X',
+    'Y',
+    'L1',
+    'R1',
+    'L2',
+    'R2',
+    'SELECT',
+    'START',
+    'LEFT STICK',
+    'RIGHT STICK',
+    'UP',
+    'DOWN',
+    'LEFT',
+    'RIGHT'
+];

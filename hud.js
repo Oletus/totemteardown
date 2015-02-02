@@ -36,11 +36,11 @@ Game.prototype.drawHud = function() {
         } else if (this.state === Game.CHOOSE_PLAYERS) {
             if (!this.totemPoles[i].isInitialized()) {
                 if (this.totemPoles[i].blocks[0].type == TotemBlock.Type.INIT) {
-                    text = "PRESS X";
+                    text = "PRESS " + this.inputMapper.getKeyInstruction(this.activateBlock, i);
                 } else if (this.cursors[i].selected) {
                     text = "DRAG TO TOP";
                 } else {
-                    text = "HOLD A";
+                    text = "HOLD " + this.inputMapper.getKeyInstruction(this.selectBlock, i);
                 }
             } else {
                 count += 1
@@ -91,19 +91,18 @@ Game.prototype.drawHud = function() {
         if (count >= this.minPlayers)
         {
             ctx.lineWidth = 4;
-            ctx.font="italic bold 50px Myriad Pro";
+            ctx.font="italic bold 45px Myriad Pro";
             if (Math.sin(this.stateTime * 2.0) > 0) {
-                canvasUtil.strokeAndFillText(ctx, 'PRESS START WHEN ALL PLAYERS ARE READY!', 0, 80);
+                canvasUtil.strokeAndFillText(ctx, 'PRESS ' + this.inputMapper.getKeyInstruction(this.start) + ' WHEN ALL PLAYERS ARE READY!', 0, 80);
             }
         } else {
             ctx.lineWidth = 4;
             ctx.font="italic bold 50px Myriad Pro";
-            canvasUtil.strokeAndFillText(ctx, 'SUMMON YOUR TOTEM USING YOUR GAMEPAD', 0, 55);
+            canvasUtil.strokeAndFillText(ctx, 'SUMMON YOUR TOTEM', 0, 55);
             ctx.font="italic bold 40px Myriad Pro";
             canvasUtil.strokeAndFillText(ctx, 'HOLD Y FOR DETAILED INSTRUCTIONS', 0, 105);
         }
     }
-    
 
     // UI that's scaled according to resolution:
     
@@ -140,7 +139,7 @@ Game.prototype.drawHud = function() {
         canvasUtil.strokeAndFillText(ctx, this.winnersText, 0, -50);
         if (this.stateTime > MIN_VICTORY_TIME) {
             if (Math.sin(this.stateTime * 2.0) > 0) {
-                canvasUtil.strokeAndFillText(ctx, 'PRESS START TO RESET', 0, 50);
+                canvasUtil.strokeAndFillText(ctx, 'PRESS ' + this.inputMapper.getKeyInstruction(this.start) + ' TO RESET', 0, 50);
             }
         }
     }

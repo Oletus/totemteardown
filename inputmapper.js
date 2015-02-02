@@ -11,6 +11,7 @@ var InputMapper = function(callbackObj, maxPlayers) {
     this.callbackObj = callbackObj;
     this.maxPlayers = maxPlayers;
     this.players = [];
+    this.callbacks = [];
 };
 
 // Controller types
@@ -70,6 +71,13 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     };
     this.gamepads.addButtonChangeListener(gamepadButton, gamepadDownCallback, gamepadUpCallback);
 
+    if (downCallback !== undefined) {
+        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: downCallback, controllerType: InputMapper.GAMEPAD});
+    }
+    if (upCallback !== undefined) {
+        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: upCallback, controllerType: InputMapper.GAMEPAD});
+    }
+
     var that = this;
     for (var i = 0; i < keyboardButtons.length; ++i) {
         (function(kbIndex) {
@@ -89,5 +97,58 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
             Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyDownCallback, 'keydown');
             Mousetrap.bindGlobal(keyboardButtons[kbIndex], keyUpCallback, 'keyup');
         })(i);
+        if (downCallback !== undefined) {
+            this.callbacks.push({key: keyboardButtons[i], callback: downCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});
+        }
+        if (upCallback !== undefined) {
+            this.callbacks.push({key: keyboardButtons[i], callback: upCallback, controllerType: InputMapper.KEYBOARD, kbIndex: i});
+        }
     }
+};
+
+InputMapper.usesController = function(player, cbInfo) {
+    if (cbInfo.controllerType === player.controllerType) {
+        if (cbInfo.controllerType === InputMapper.KEYBOARD && player.controllerIndex !== cbInfo.kbIndex) {
+            return false;
+        }
+        return true;
+    }
+};
+/**
+ * Get instruction for a key. Prioritizes gamepad over keyboard if keyboard hasn't been used.
+ * @param {function} callback A callback that has been previously attached to a button.
+ * @param {playerIndex} index of the player to return information for. Set to undefined if the listener doesn't care about the player number.
+ * @return {string} String identifying the button for the player.
+ */
+InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
+    // TODO: Handle a player with two active controllers.
+    var player;
+    if (playerIndex !== undefined) {
+        if (playerIndex < this.players.length) {
+            player = this.players[playerIndex];
+        } else {
+            player = new InputMapper.Player(InputMapper.GAMEPAD, 0);
+        }
+    }
+    var returnStr = [];
+    for (var i = 0; i < this.callbacks.length; ++i) {
+        var cbInfo = this.callbacks[i];
+        if (cbInfo.callback === callback) {
+            if (player === undefined) {
+                for (var j = 0; j < this.players.length; ++j) {
+                    if (InputMapper.usesController(this.players[j], cbInfo)) {
+                        returnStr.push(cbInfo.key.toUpperCase());
+                    }
+                }
+            } else {
+                if (InputMapper.usesController(player, cbInfo)) {
+                    return cbInfo.key.toUpperCase();
+                }
+            }
+        }
+    }
+    if (player === undefined) {
+        return returnStr.join('/');
+    }
+    return '';
 };
