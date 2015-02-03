@@ -26,20 +26,20 @@ Game.prototype.reset = function() {
 
     this.instructionsRequested = 0;
     
-    var startPoleX = POLE_DISTANCE_FROM_EDGE,
-        startPoleY = GROUND_LEVEL;
+    var poleX = POLE_DISTANCE_FROM_EDGE,
+        poleY = GROUND_LEVEL;
 
     for(var i = 0; i < POLE_COUNT; i++) {
-        this.totemPoles.push(new TotemPole({x: startPoleX, y: startPoleY, color: i}));
-        var startBlockY = startPoleY - (STARTING_BLOCKS + 1) * BLOCK_HEIGHT * 1.5;
+        this.totemPoles.push(new TotemPole({x: poleX, y: poleY, color: i}));
+        var blockY = poleY - (STARTING_BLOCKS + 1) * BLOCK_HEIGHT * 1.5;
         for (var j = 0; j < STARTING_BLOCKS; j++) {
             var types = STARTING_TYPES[i % STARTING_TYPES.length];
             var type = TotemBlock.typeFromChar(types[j % types.length]);
-            this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: type}));
-            startBlockY += BLOCK_HEIGHT * 1.5;
+            this.totemPoles[i].blocks.push(new TotemBlock({x: poleX, y: blockY, type: type}));
+            blockY += BLOCK_HEIGHT * 1.5;
         }
-        this.totemPoles[i].blocks.push(new TotemBlock({x: startPoleX, y: startBlockY, type: TotemBlock.Type.INIT}));
-        startPoleX += POLE_DISTANCE;
+        this.totemPoles[i].blocks.push(new TotemBlock({x: poleX, y: blockY, type: TotemBlock.Type.INIT}));
+        poleX += POLE_DISTANCE;
     }
 
     this.cursors = [];
@@ -70,6 +70,17 @@ Game.prototype.reset = function() {
     this.debugMode ? debugPanel.style.display = 'block' : debugPanel.style.display = 'none';
 
     resizeGame();
+};
+
+Game.prototype.repositionPoles = function() {
+    var poleX = POLE_DISTANCE_FROM_EDGE;
+    for(var i = 0; i < this.totemPoles.length; i++) {
+        for (var j = 0; j < this.totemPoles[i].blocks.length; j++) {
+            this.totemPoles[i].x = poleX;
+            this.totemPoles[i].blocks[j].x = poleX;
+        }
+        poleX += POLE_DISTANCE;
+    }
 };
 
 Game.CHOOSE_PLAYERS = -2;
@@ -248,6 +259,7 @@ Game.prototype.start = function() {
                 ++i;
             }
         }
+        this.repositionPoles();
         resizeGame();
     }
 };
