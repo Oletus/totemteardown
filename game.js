@@ -127,7 +127,7 @@ Game.prototype.cursorActive = function(playerNumber) {
 };
 
 Game.prototype.clampCursor = function(cursor) {
-    if (cursor.pole >= this.totemPoles.length) {
+    if (cursor.pole < 0 || cursor.pole >= this.totemPoles.length) {
         return;
     }
     var blocks = this.totemPoles[cursor.pole].blocks;
@@ -255,6 +255,13 @@ Game.prototype.start = function() {
             var pole = this.totemPoles[i];
             if (!pole.isInitialized()) {
                 this.totemPoles.splice(i, 1);
+                for (var j = 0; j < this.cursors.length; ++j) {
+                    if (this.cursors[j].pole == i) {
+                        this.cursors[j].pole = -1;
+                    } else if (this.cursors[j].pole > i) {
+                        --this.cursors[j].pole;
+                    }
+                }
             } else {
                 ++i;
             }
@@ -312,7 +319,7 @@ Game.prototype.moveCursorDown = function(playerNumber) {
         cursor.block++;
         this.clampCursor(cursor);
     } else {
-        if (cursor.block < this.totemPoles[cursor.pole].blocks.length - 1) {
+        if (this.hasBlock(cursor.pole, cursor.block + 1)) {
             var topBlock = cursor.block;
             var bottomBlock = cursor.block + 1;
             if (this.swap(cursor.pole, topBlock, bottomBlock)) {
@@ -334,7 +341,7 @@ Game.prototype.moveCursorUp = function(playerNumber) {
         cursor.block--;
         this.clampCursor(cursor);
     } else {
-        if (cursor.block > 0) {
+        if (this.hasBlock(cursor.pole, cursor.block - 1)) {
             var topBlock = cursor.block - 1;
             var bottomBlock = cursor.block;
             if (this.swap(cursor.pole, topBlock, bottomBlock)) {
@@ -372,7 +379,7 @@ Game.prototype.cursorRight = function(playerNumber) {
 };
 
 Game.prototype.hasBlock = function(pole, block) {
-    return this.totemPoles.length > pole && this.totemPoles[pole].blocks.length > block;
+    return pole >= 0 && this.totemPoles.length > pole && this.totemPoles[pole].blocks.length > block;
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
