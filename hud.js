@@ -139,6 +139,7 @@ Game.prototype.drawHud = function() {
         canvasUtil.strokeAndFillText(ctx, this.winnersText, 0, -50);
         if (this.stateTime > MIN_VICTORY_TIME) {
             if (Math.sin(this.stateTime * 2.0) > 0) {
+                ctx.font="italic bold 80px Myriad Pro";
                 canvasUtil.strokeAndFillText(ctx, 'PRESS ' + this.inputMapper.getKeyInstruction(this.start) + ' TO RESET', 0, 50);
             }
         }
