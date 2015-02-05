@@ -379,7 +379,7 @@ Game.prototype.cursorRight = function(playerNumber) {
 };
 
 Game.prototype.hasBlock = function(pole, block) {
-    return pole >= 0 && this.totemPoles.length > pole && this.totemPoles[pole].blocks.length > block;
+    return pole >= 0 && this.totemPoles.length > pole && block >= 0 && this.totemPoles[pole].blocks.length > block;
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
