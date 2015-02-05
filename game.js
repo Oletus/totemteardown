@@ -49,8 +49,8 @@ Game.prototype.reset = function() {
 
     this.inputMapper = new InputMapper(this, 4);
 
-    this.inputMapper.addListener(Gamepads.BUTTONS.DOWN, ['down', 's'], this.moveCursorDown);
-    this.inputMapper.addListener(Gamepads.BUTTONS.UP, ['up', 'w'], this.moveCursorUp);
+    this.inputMapper.addListener(Gamepads.BUTTONS.DOWN_OR_ANALOG_DOWN, ['down', 's'], this.moveCursorDown);
+    this.inputMapper.addListener(Gamepads.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.moveCursorUp);
     this.inputMapper.addListener(Gamepads.BUTTONS.LEFT, ['left', 'a'], this.cursorLeft);
     this.inputMapper.addListener(Gamepads.BUTTONS.RIGHT, ['right', 'd'], this.cursorRight);
     this.inputMapper.addListener(Gamepads.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
