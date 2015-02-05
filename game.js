@@ -438,7 +438,7 @@ Game.prototype.activateBlock = function(playerNumber) {
             if (this.state == Game.CHOOSE_PLAYERS) {
                 return;
             }
-            var addedObjs = pole.blocks[cursor.block].activate(playerNumber, this.eagleRoar);
+            var addedObjs = pole.blocks[cursor.block].activate(playerNumber);
             this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
     }
