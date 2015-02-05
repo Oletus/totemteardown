@@ -67,14 +67,15 @@ Gamepads.prototype.update = function() {
                 } else {
                     value = pad.buttons[buttonNumber];
                 }
-                this.markDownAndCallback(l, p, value);
                 if (l.buttonNumber > 100) {
                     var axis = (l.buttonNumber <= Gamepads.BUTTONS.DOWN_OR_ANALOG_DOWN) ? 1 : 0;
-                    var value = pad.axes[axis];
+                    var axisValue = pad.axes[axis];
                     // positive values are down/right, negative up/left
                     if (l.buttonNumber % 2 === Gamepads.BUTTONS.UP_OR_ANALOG_UP % 2) {
-                        value = -value;
+                        axisValue = -axisValue;
                     }
+                    this.markDownAndCallback(l, p, Math.max(value, axisValue));
+                } else {
                     this.markDownAndCallback(l, p, value);
                 }
             }
