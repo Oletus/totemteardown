@@ -65,10 +65,6 @@ Game.prototype.reset = function() {
     
     this.winnersText = undefined;
 
-    var debugPanel = document.getElementById("debug");
-
-    this.debugMode ? debugPanel.style.display = 'block' : debugPanel.style.display = 'none';
-
     resizeGame();
 };
 

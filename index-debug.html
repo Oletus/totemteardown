@@ -21,7 +21,7 @@
 <script src="gameplay_params.js"></script>
 </head>
 <body onload="initGame(true)">
-    <div id="debug" style="display: none; background-color: #fff">
+    <div id="debug" style="background-color: #fff">
         Bullet Speed: <input id="bulletspeed" type="text" value="" /><br />
         Swap Speed: <input id="swapspeed" type="text" value="" /><br />
         Fall Acceleration: <input id="fallaccel" type="text" value="" /><br />
@@ -65,15 +65,15 @@
     var saveButton = document.getElementById('save');
 
     saveButton.addEventListener('click', function(e) {
-        SHOT_SPEED = bulletspeed.value;
-        SWAP_SPEED = swapspeed.value;
-        FALL_ACCELERATION = fallaccel.value;
-        FALL_SPEED = fallspeed.value;
-        JUMP_SPEED = jumpspeed.value;
-        POLE_COUNT = polecount.value;
-        POLE_DISTANCE = poledistance.value;
-        STARTING_BLOCKS = startingblocks.value;
-        BLOCK_HEIGHT = blockheight.value;
+        SHOT_SPEED = parseFloat(bulletspeed.value);
+        SWAP_SPEED = parseFloat(swapspeed.value);
+        FALL_ACCELERATION = parseFloat(fallaccel.value);
+        FALL_SPEED = parseFloat(fallspeed.value);
+        JUMP_SPEED = parseFloat(jumpspeed.value);
+        POLE_COUNT = parseInt(polecount.value);
+        POLE_DISTANCE = parseFloat(poledistance.value);
+        STARTING_BLOCKS = parseInt(startingblocks.value);
+        BLOCK_HEIGHT = parseFloat(blockheight.value);
     });
 </script>
     <div id="gameArea">

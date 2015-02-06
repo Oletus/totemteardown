@@ -21,61 +21,6 @@
 <script src="gameplay_params.js"></script>
 </head>
 <body onload="initGame(false)">
-    <div id="debug" style="display: none; background-color: #fff">
-        Bullet Speed: <input id="bulletspeed" type="text" value="" /><br />
-        Swap Speed: <input id="swapspeed" type="text" value="" /><br />
-        Fall Acceleration: <input id="fallaccel" type="text" value="" /><br />
-        Fall Speed: <input id="fallspeed" type="text" value="" /><br />
-        Jump Speed: <input id="jumpspeed" type="text" value="" /><br />
-        Pole Count: <input id="polecount" type="text" value="" /><br />
-        Pole Distance: <input id="poledistance" type="text" value="" /><br />
-        Starting Blocks: <input id="startingblocks" type="text" value="" /><br />
-        Block Height: <input id="blockheight" type="text" value="" /><br />
-        <button id="save">Save</button>
-    </div>
-<script>
-
-    var bulletspeed = document.getElementById('bulletspeed');
-    bulletspeed.value = SHOT_SPEED;
-
-    var swapspeed = document.getElementById('swapspeed');
-    swapspeed.value = SWAP_SPEED;
-
-    var fallaccel = document.getElementById('fallaccel');
-    fallaccel.value = FALL_ACCELERATION;
-
-    var fallspeed = document.getElementById('fallspeed');
-    fallspeed.value = FALL_SPEED;
-
-    var jumpspeed = document.getElementById('jumpspeed');
-    jumpspeed.value = JUMP_SPEED;
-
-    var polecount = document.getElementById('polecount');
-    polecount.value = POLE_COUNT;
-
-    var poledistance = document.getElementById('poledistance');
-    poledistance.value = POLE_DISTANCE;
-
-    var startingblocks = document.getElementById('startingblocks');
-    startingblocks.value = STARTING_BLOCKS;
-
-    var blockheight = document.getElementById('blockheight');
-    blockheight.value = BLOCK_HEIGHT;
-
-    var saveButton = document.getElementById('save');
-
-    saveButton.addEventListener('click', function(e) {
-        SHOT_SPEED = bulletspeed.value;
-        SWAP_SPEED = swapspeed.value;
-        FALL_ACCELERATION = fallaccel.value;
-        FALL_SPEED = fallspeed.value;
-        JUMP_SPEED = jumpspeed.value;
-        POLE_COUNT = polecount.value;
-        POLE_DISTANCE = poledistance.value;
-        STARTING_BLOCKS = startingblocks.value;
-        BLOCK_HEIGHT = blockheight.value;
-    });
-</script>
     <div id="gameArea">
         <canvas id="totemGame"></canvas>
     </div>
