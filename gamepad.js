@@ -18,14 +18,14 @@ Gamepads.prototype.gamepadForPlayer = function(gamepads, playerNumber) {
  * @protected
  */
 Gamepads.prototype.markDownAndCallback = function(l, p, value) {
-    if (value > 0.6) {
+    if (value > 0.5) {
         if (!l.isDown[p]) {
             l.isDown[p] = true;
             if (l.callback !== undefined) {
                 l.callback.call(this.callbackObj, p);
             }
         }
-    } else if (value < 0.1) {
+    } else if (value < 0.3) {
         if (l.isDown[p]) {
             l.isDown[p] = false;
             if (l.callbackUp !== undefined) {
