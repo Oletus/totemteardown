@@ -2,6 +2,9 @@
 
 /**
  * Mapper that automatically maps keyboard / gamepad input to different player numbers.
+ * This can be used to implement keyboard / gamepad controls for a single player or a local
+ * multiplayer game that allows players on the keyboard to play against players on gamepads.
+ * Requires gamepad.js to be included.
  * @param {Object} callbackObj Object on which the callback functions will be called.
  * @param {number} maxPlayers Maximum number of players. If there are more active controllers
  * than this, then two controllers may be mapped to the same player.
@@ -21,6 +24,9 @@ InputMapper.KEYBOARD = 1;
 
 /**
  * Helper class to store the controller config each player has.
+ * @param {number} controllerType Controller type: either InputMapper.GAMEPAD or InputMapper.KEYBOARD
+ * @param {number} controllerIndex Controller index: in case of keyboard, index into the array of keyboard keys given
+ * to addListener. In case of gamepad, index of the gamepad.
  */
 InputMapper.Controller = function(controllerType, controllerIndex) {
     this.controllerType = controllerType;
@@ -32,18 +38,24 @@ InputMapper.Controller = function(controllerType, controllerIndex) {
  * Reset the map between controllers and player numbers.
  */
 InputMapper.prototype.resetPlayerMap = function() {
-    this.players = []; // An array of arrays of controllers
+    this.players = []; // An array of arrays of controllers. Each player can have multiple controllers.
     for (var i = 0; i < this.maxPlayers; ++i) {
         this.players.push([]);
     }
 };
 
+/**
+ * Update the controller state and call listeners based on that.
+ */
 InputMapper.prototype.update = function() {
     this.gamepads.update();
 };
 
 /**
  * Return a player index for a player using a given controller.
+ * @param {number} controllerType Controller type: either InputMapper.GAMEPAD or InputMapper.KEYBOARD
+ * @param {number} controllerIndex Controller index: in case of keyboard, index into the array of keyboard keys given
+ * to addListener. In case of gamepad, index of the gamepad.
  */
 InputMapper.prototype.getPlayerIndex = function(controllerType, controllerIndex) {
     for (var i = 0; i < this.players.length; ++i) {
@@ -145,15 +157,29 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     }
 };
 
+/**
+ * Check if a given callback uses a given type of controller. Doesn't care about gamepad indices.
+ * @protected
+ * @param {InputMapper.Controller} controller
+ * @param {Object} cbInfo Information on the callback, with keys controllerType and kbIndex in case of a keyboard.
+ * @return {boolean} True if the given callback uses the given type of a controller.
+ */
 InputMapper.usesController = function(controller, cbInfo) {
     if (cbInfo.controllerType === controller.controllerType) {
         if (cbInfo.controllerType === InputMapper.KEYBOARD && controller.controllerIndex !== cbInfo.kbIndex) {
+            // Each keyboard "controller" has different key bindings.
             return false;
         }
         return true;
     }
 };
 
+/**
+ * From an array of controllers, determine the one that was most recently used.
+ * @protected
+ * @param {Array.<InputMapper.Controller>} player Array of controllers to check.
+ * @return {InputMapper.Controller} The most recently used controller.
+ */
 InputMapper.prototype.getLastUsedController = function(player) {
     var controller;
     var lastUsed = 0;
@@ -169,7 +195,8 @@ InputMapper.prototype.getLastUsedController = function(player) {
 /**
  * Get instruction for a key. Prioritizes gamepad over keyboard if keyboard hasn't been used.
  * @param {function} callback A callback that has been previously attached to a button.
- * @param {playerIndex} index of the player to return information for. Set to undefined if the listener doesn't care about the player number.
+ * @param {playerIndex} index of the player to return information for. Set to undefined if the listener doesn't care
+ * about the player number.
  * @return {string} String identifying the button for the player.
  */
 InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
@@ -187,7 +214,8 @@ InputMapper.prototype.getKeyInstruction = function(callback, playerIndex) {
         var cbInfo = this.callbacks[i];
         if (cbInfo.callback === callback) {
             if (controller === undefined) {
-                // Determine all keys mapped to that callback from different controllers
+                // Listener doesn't care about the player number.
+                // Determine all keys mapped to that callback from different controllers.
                 for (var j = 0; j < this.players.length; ++j) {
                     for (var k = 0; k < this.players[j].length; ++k) {
                         if (InputMapper.usesController(this.players[j][k], cbInfo)) {
