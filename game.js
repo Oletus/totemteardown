@@ -241,6 +241,7 @@ Game.prototype.start = function() {
     var activePlayers = 0;
     for (var i = 0; i < this.totemPoles.length; ++i) {
         if (this.totemPoles[i].isInitialized()) {
+            this.totemPoles[i].playerNumber = i;
             ++activePlayers;
         }
     }
@@ -536,7 +537,7 @@ Game.prototype.update = function() {
 
     for(i = 0; i < this.totemPoles.length; i++) {
         var pole = this.totemPoles[i];
-        var canShoot = (this.activeProjectiles(i) < MAX_ACTIVE_PROJECTILES_PER_PLAYER);
+        var canShoot = (this.activeProjectiles(pole.playerNumber) < MAX_ACTIVE_PROJECTILES_PER_PLAYER);
         pole.update(canShoot);
         while (pole.spawnBlocks > 0) {
             this.spawnBlockInPole(i, pole.spawnBlocks, false);
