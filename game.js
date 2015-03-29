@@ -59,8 +59,8 @@ Game.prototype.reset = function() {
     this.inputMapper.addListener(Gamepads.BUTTONS.Y, ['y'], this.showInstructions, this.hideInstructions);
 
     if(SOUND_ON) {
-        Game.longIntroSound.playClone();
-        Game.backgroundMusic.play();
+        Game.longIntroSound.play();
+        Game.backgroundMusic.playSingular(true);
     }
     
     this.winnersText = undefined;
@@ -97,16 +97,16 @@ Game.fg = new Sprite('foreground.png');
 
 Game.instructionsSprite = new Sprite('Instructions.png');
 
-Game.backgroundMusic = new Audio('music', true);
-Game.explosionSound = new Audio('explosion', false);
-Game.shieldSound = new Audio('shield', false);
-Game.thunderSound = new Audio('thunder', false);
-Game.longIntroSound = new Audio('longintro', false);
+Game.backgroundMusic = new Audio('music');
+Game.explosionSound = new Audio('explosion');
+Game.shieldSound = new Audio('shield');
+Game.thunderSound = new Audio('thunder');
+Game.longIntroSound = new Audio('longintro');
 
-Game.player1Switch = new Audio('switch1', false);
-Game.player2Switch = new Audio('switch2', false);
-Game.player3Switch = new Audio('switch3', false);
-Game.player4Switch = new Audio('switch4', false);
+Game.player1Switch = new Audio('switch1');
+Game.player2Switch = new Audio('switch2');
+Game.player3Switch = new Audio('switch3');
+Game.player4Switch = new Audio('switch4');
 
 Game.xSprite = new Sprite('button_x.png');
 
@@ -223,7 +223,7 @@ Game.prototype.spawnNewBlocks = function() {
     Game.thunderSound.volume = 0.3;
 
     if(SOUND_ON) {
-        Game.thunderSound.playClone();
+        Game.thunderSound.play();
     }
 
     Game.backgroundMusic.volume = 1;
@@ -291,16 +291,16 @@ Game.prototype.swap = function(pole, blockA, blockB) {
 Game.prototype.playSwapSound = function(pole) {
     switch(pole) {
         case 0:
-            Game.player1Switch.playClone();
+            Game.player1Switch.play();
             break;
         case 1:
-            Game.player2Switch.playClone();
+            Game.player2Switch.play();
             break;
         case 2:
-            Game.player3Switch.playClone();
+            Game.player3Switch.play();
             break;
         case 3:
-            Game.player4Switch.playClone();
+            Game.player4Switch.play();
             break;
         default:
             break;
@@ -480,14 +480,14 @@ Game.prototype.killBlocks = function(killBox, obj) {
                         }
                     }
                     if(blocked && SOUND_ON) {
-                        Game.shieldSound.playClone();
+                        Game.shieldSound.play();
                     }
                 }
 
                 var splashSize = EMISSION_RATE;
                 if (!blocked) {
                     if(SOUND_ON) {
-                        Game.explosionSound.playClone();
+                        Game.explosionSound.play();
                     }
 
                     this.totemPoles[j].blocks.splice(k, 1);

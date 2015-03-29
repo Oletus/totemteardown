@@ -27,9 +27,9 @@ var TotemBlock = function(options) {
     this.fireCount = 0;
 };
 
-TotemBlock.woodSound = new Audio('wood', false);
-TotemBlock.swooshSound = new Audio('swoosh', false);
-TotemBlock.eagleRoar = new Audio('eagle', false);
+TotemBlock.woodSound = new Audio('wood');
+TotemBlock.swooshSound = new Audio('swoosh');
+TotemBlock.eagleRoar = new Audio('eagle');
 
 TotemBlock.SUPPORTED = 0;
 TotemBlock.SWAPPING = 1;
@@ -211,7 +211,7 @@ TotemBlock.prototype.update = function(supportedLevel) {
             this.velY = 0;
 
             if(SOUND_ON) {
-                TotemBlock.woodSound.playClone();
+                TotemBlock.woodSound.play();
             }
         }
     }
@@ -272,7 +272,7 @@ TotemBlock.prototype.activate = function(playerNumber) {
             this.velY -= JUMP_SPEED;
         }
         if(SOUND_ON) {
-            TotemBlock.swooshSound.playClone();
+            TotemBlock.swooshSound.play();
         }
     }
     if (this.type === TotemBlock.Type.SHOOTLEFT) {
@@ -289,7 +289,7 @@ TotemBlock.prototype.activate = function(playerNumber) {
 TotemBlock.prototype.playEagleRoar = function() {
     this.fireCount++;
     if(SOUND_ON && this.fireCount === EAGLE_ROAR_SOUND_INTERVAL) {
-        TotemBlock.eagleRoar.playClone();
+        TotemBlock.eagleRoar.play();
         this.fireCount = 0;
     }
 };
