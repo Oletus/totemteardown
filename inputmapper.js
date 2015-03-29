@@ -4,7 +4,7 @@
  * Mapper that automatically maps keyboard / gamepad input to different player numbers.
  * This can be used to implement keyboard / gamepad controls for a single player or a local
  * multiplayer game that allows players on the keyboard to play against players on gamepads.
- * Requires gamepad.js to be included.
+ * Requires gamepad.js, Mousetrap and MouseTrap-global-bind to be included.
  * @param {Object} callbackObj Object on which the callback functions will be called.
  * @param {number} maxPlayers Maximum number of players. If there are more active controllers
  * than this, then two controllers may be mapped to the same player.
@@ -117,11 +117,19 @@ InputMapper.prototype.addListener = function(gamepadButton, keyboardButtons, dow
     };
     this.gamepads.addButtonChangeListener(gamepadButton, gamepadDownCallback, gamepadUpCallback);
 
+    var gamepadInstruction;
+    
+    if (gamepadButton < 100) {
+        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton];
+    } else {
+        gamepadInstruction = Gamepads.BUTTON_INSTRUCTION[gamepadButton - 100];
+    }
+    
     if (downCallback !== undefined) {
-        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: downCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: downCallback, controllerType: InputMapper.GAMEPAD});
     }
     if (upCallback !== undefined) {
-        this.callbacks.push({key: Gamepads.BUTTON_INSTRUCTION[gamepadButton], callback: upCallback, controllerType: InputMapper.GAMEPAD});
+        this.callbacks.push({key: gamepadInstruction, callback: upCallback, controllerType: InputMapper.GAMEPAD});
     }
 
     var that = this;
