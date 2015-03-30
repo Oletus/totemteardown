@@ -42,6 +42,9 @@ Gamepads.prototype.update = function() {
     } else if (navigator.webkitGetGamepads) {
         gamepads = navigator.webkitGetGamepads();
     }
+    if (gamepads === undefined) {
+        return;
+    }
 
     for (var i = 0; i < gamepads.length; ++i) {
         if (gamepads[i] !== undefined && gamepads[i] !== null) {
@@ -62,7 +65,7 @@ Gamepads.prototype.update = function() {
                 if (l.buttonNumber > 100) {
                     buttonNumber -= 100;
                 }
-                if (pad.buttons[buttonNumber].hasOwnProperty('value')) {
+                if ('value' in pad.buttons[buttonNumber]) {
                     value = pad.buttons[buttonNumber].value;
                 } else {
                     value = pad.buttons[buttonNumber];
