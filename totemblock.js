@@ -83,20 +83,6 @@ TotemBlock.whiteHeadSprites = null;
 TotemBlock.totemPoleColors = ['red', 'blue', 'green', 'yellow'];
 
 var loadSprites = function() {
-    for (var i = 0; i < TotemBlock.spriteSrc.length; ++i) {
-        var src = TotemBlock.spriteSrc[i];
-        if (!src.loaded) {
-            setTimeout(loadSprites, 500);
-            return;
-        }
-    }
-    for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
-        var src = TotemBlock.headSprites[i];
-        if (!src.loaded) {
-            setTimeout(loadSprites, 500);
-            return;
-        }
-    }
     TotemBlock.sprites = [];
     TotemBlock.whiteSprites = [];
     TotemBlock.whiteHeadSprites = [];
@@ -105,7 +91,7 @@ var loadSprites = function() {
         var tintedVariations = [];
         for (var j = 0; j < 4; ++j) {
             if (TINTING_AMOUNT > 0) {
-                var solid = src.getSolidColoredVersion(TotemBlock.totemPoleColors[j]);
+                var solid = new Sprite(src.filename, TotemBlock.totemPoleColors[j]);
 
                 var canvas3 = document.createElement('canvas');
                 canvas3.width = src.width;
@@ -120,13 +106,13 @@ var loadSprites = function() {
             }
         }
         TotemBlock.sprites.push(tintedVariations);
-        var white = src.getSolidColoredVersion('#fff');
+        var white = new Sprite(src.filename, '#fff');
         TotemBlock.whiteSprites.push(white);
     }
 
     for (var i = 0; i < TotemBlock.headSprites.length; ++i) {
         var src = TotemBlock.headSprites[i];
-        var white = src.getSolidColoredVersion('#fff');
+        var white = new Sprite(src.filename, '#fff');
         TotemBlock.whiteHeadSprites.push(white);
     }
 };
