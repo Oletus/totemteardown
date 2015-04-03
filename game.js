@@ -584,47 +584,49 @@ Game.prototype.update = function(deltaTime) {
 };
 
 Game.prototype.render = function() {
-    var i;
+    if (!this.resetPending) {
+        var i;
 
-    Game.bg.fillCanvas(ctx);
+        Game.bg.fillCanvas(ctx);
 
-    var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
-    ctx.fillStyle = '#f80';
-    ctx.fillRect(0, victoryLineHeight, ctx.canvas.width, 2);
+        var victoryLineHeight = GROUND_LEVEL - VICTORY_BLOCKS * BLOCK_HEIGHT;
+        ctx.fillStyle = '#f80';
+        ctx.fillRect(0, victoryLineHeight, ctx.canvas.width, 2);
 
-    for (i = 0; i < this.totemPoles.length; i++) {
-        this.totemPoles[i].render();
-    }
+        for (i = 0; i < this.totemPoles.length; i++) {
+            this.totemPoles[i].render();
+        }
 
-    if (this.state !== Game.VICTORY) {
-        for (i = 0; i < this.cursors.length; ++i) {
-            var cursor = this.cursors[i];
-            if (this.hasBlock(cursor.pole, cursor.block)) {
-                var block = this.totemPoles[cursor.pole].blocks[cursor.block];
-                Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
-                if (block.canBeActivated() && this.state === Game.PLAYING) {
-                    if (block.type == TotemBlock.Type.SHOOTRIGHT) {
-                        Game.xSprite.drawRotated(ctx, block.x + 65, block.y, 0);
-                    } else {
-                        Game.xSprite.drawRotated(ctx, block.x - 65, block.y, 0);
-                    }
-                };
+        if (this.state !== Game.VICTORY) {
+            for (i = 0; i < this.cursors.length; ++i) {
+                var cursor = this.cursors[i];
+                if (this.hasBlock(cursor.pole, cursor.block)) {
+                    var block = this.totemPoles[cursor.pole].blocks[cursor.block];
+                    Game.cursorSprites[i].drawRotated(ctx, block.x, block.y, cursor.selected ? Math.PI * 0.25 : 0);
+                    if (block.canBeActivated() && this.state === Game.PLAYING) {
+                        if (block.type == TotemBlock.Type.SHOOTRIGHT) {
+                            Game.xSprite.drawRotated(ctx, block.x + 65, block.y, 0);
+                        } else {
+                            Game.xSprite.drawRotated(ctx, block.x - 65, block.y, 0);
+                        }
+                    };
+                }
             }
         }
-    }
-    
-    for (i = 0; i < this.dynamicObjs.length; ++i) {
-        this.dynamicObjs[i].render();
-    }
-    
-    Game.fg.draw(ctx, 0, GROUND_LEVEL - Game.fg.height * 0.15);
+        
+        for (i = 0; i < this.dynamicObjs.length; ++i) {
+            this.dynamicObjs[i].render();
+        }
+        
+        Game.fg.draw(ctx, 0, GROUND_LEVEL - Game.fg.height * 0.15);
 
-    drawParticles();
+        drawParticles();
 
-    this.drawHud();
-    
-    if (this.instructionsRequested > 0 && this.state == Game.CHOOSE_PLAYERS) {
-        Game.instructionsSprite.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height * 0.5, 0);
+        this.drawHud();
+        
+        if (this.instructionsRequested > 0 && this.state == Game.CHOOSE_PLAYERS) {
+            Game.instructionsSprite.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height * 0.5, 0);
+        }
     }
 
     this.loadingBar.render(ctx);
