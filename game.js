@@ -10,6 +10,7 @@ var nextFrameTime;
 var Game = function(debugMode) {
     this.debugMode = debugMode || false;
     this.minPlayers = this.debugMode ? 1 : MIN_PLAYERS;
+    this.loadingBar = new LoadingBar();
     this.reset();
 };
 
@@ -515,7 +516,10 @@ Game.prototype.killBlocks = function(killBox, obj) {
 };
 
 // This runs at fixed 60 FPS
-Game.prototype.update = function() {
+Game.prototype.update = function(deltaTime) {
+    if (!this.loadingBar.update(deltaTime)) {
+        return;
+    }
     var i;
     this.inputMapper.update();
 
@@ -576,6 +580,10 @@ Game.prototype.update = function() {
 };
 
 Game.prototype.render = function() {
+    if (!this.loadingBar.finished()) {
+        this.loadingBar.render(ctx);
+        return;
+    }
     var i;
 
     Game.bg.fillCanvas(ctx);
