@@ -40,7 +40,7 @@ LoadingBar.prototype.update = function(deltaTime) {
         if (loadedFraction < 1) {
             this.allLoaded = false;
         }
-        this.loadedFraction += loadedFraction / this.objectsToPoll.length;
+        this.loadedFraction += Math.min(loadedFraction, 1.0) / this.objectsToPoll.length;
     }
     return this.allLoaded;
 };
@@ -67,6 +67,7 @@ LoadingBar.prototype.render = function(ctx) {
         ctx.fillStyle = '#000';
         ctx.fillRect(-95, -20, 190, 40);
         ctx.fillStyle = '#fff';
+        // Fake some loading animation even if loading doesn't really take any time.
         ctx.fillRect(-90, -15, 180 * Math.min(this.loadedFraction, this.sinceStarted * 4), 30);
         ctx.restore();
     }
