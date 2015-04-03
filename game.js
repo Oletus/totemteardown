@@ -11,10 +11,11 @@ var Game = function(debugMode) {
     this.debugMode = debugMode || false;
     this.minPlayers = this.debugMode ? 1 : MIN_PLAYERS;
     this.loadingBar = new LoadingBar();
-    this.reset();
+    this.resetPending = true;
 };
 
 Game.prototype.reset = function() {
+    this.resetPending = false;
     this.totemPoles = [];
     this.dynamicObjs = [];
 
@@ -520,6 +521,9 @@ Game.prototype.update = function(deltaTime) {
     if (!this.loadingBar.update(deltaTime)) {
         return;
     }
+    if (this.resetPending) {
+        this.reset();
+    }
     var i;
     this.inputMapper.update();
 
@@ -580,10 +584,6 @@ Game.prototype.update = function(deltaTime) {
 };
 
 Game.prototype.render = function() {
-    if (!this.loadingBar.finished()) {
-        this.loadingBar.render(ctx);
-        return;
-    }
     var i;
 
     Game.bg.fillCanvas(ctx);
@@ -626,6 +626,8 @@ Game.prototype.render = function() {
     if (this.instructionsRequested > 0 && this.state == Game.CHOOSE_PLAYERS) {
         Game.instructionsSprite.drawRotated(ctx, ctx.canvas.width * 0.5, ctx.canvas.height * 0.5, 0);
     }
+
+    this.loadingBar.render(ctx);
 };
 
 var initGame = function(debugMode) {
