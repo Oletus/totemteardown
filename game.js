@@ -6,6 +6,7 @@ var canvas;
 var ctx;
 var game;
 var nextFrameTime;
+var canvasResizer;
 
 var Game = function(debugMode) {
     this.debugMode = debugMode || false;
@@ -584,6 +585,7 @@ Game.prototype.update = function(deltaTime) {
 };
 
 Game.prototype.render = function() {
+    canvasResizer.render();
     if (!this.resetPending) {
         var i;
 
@@ -634,6 +636,7 @@ Game.prototype.render = function() {
 
 var initGame = function(debugMode) {
     canvas = document.getElementById('totemGame');
+    canvasResizer = new CanvasResizer({canvas: canvas, mode: CanvasResizer.Mode.FIXED_RESOLUTION_INTERPOLATED});
 
     resizeGame();
 
@@ -650,33 +653,12 @@ var initGame = function(debugMode) {
 };
 
 var resizeGame = function() {
-    var gameArea = document.getElementById('gameArea');
     var poles = POLE_COUNT;
     if (game && game.totemPoles.length > 0) {
         poles = game.totemPoles.length;
     }
     var screenWidthForPlayerCount = (poles - 1) * POLE_DISTANCE + 2 * POLE_DISTANCE_FROM_EDGE;
-    var widthToHeight = screenWidthForPlayerCount / SCREEN_HEIGHT;
-    var newWidth = window.innerWidth;
-    var newHeight = window.innerHeight;
-    var newWidthToHeight = newWidth / newHeight;
-
-    if (newWidthToHeight > widthToHeight) {
-        newWidth = newHeight * widthToHeight;
-        gameArea.style.height = newHeight + 'px';
-        gameArea.style.width = newWidth + 'px';
-    } else {
-        newHeight = newWidth / widthToHeight;
-        gameArea.style.width = newWidth + 'px';
-        gameArea.style.height = newHeight + 'px';
-    }
-
-    gameArea.style.marginTop = (-newHeight / 2) + 'px';
-    gameArea.style.marginLeft = (-newWidth / 2) + 'px';
-
-    var gameCanvas = document.getElementById('totemGame');
-    gameCanvas.width = screenWidthForPlayerCount;
-    gameCanvas.height = SCREEN_HEIGHT;
+    canvasResizer.changeCanvasDimensions(screenWidthForPlayerCount, SCREEN_HEIGHT);
 };
 
 window.addEventListener('resize', resizeGame, false);
