@@ -620,28 +620,6 @@ Game.prototype.render = function() {
     }
 };
 
-var webFrame = function() {
-    var time = new Date().getTime();
-    var updated = false;
-    var updates = 0;
-    if (time - nextFrameTime > 500) {
-        nextFrameTime = time - 500;
-    }
-    while (time > nextFrameTime) {
-        nextFrameTime += 1000 / FPS;
-        game.update();
-        updates++;
-    }
-    /*if (updates > 1) {
-        console.log('dropped ' + (updates - 1) + ' frames');
-    }*/
-    if (updates > 0) {
-        game.render();
-    }
-    requestAnimationFrame(webFrame);
-};
-
-
 var initGame = function(debugMode) {
     canvas = document.getElementById('totemGame');
 
@@ -656,8 +634,7 @@ var initGame = function(debugMode) {
 
     game.particles = [];
 
-    nextFrameTime = new Date().getTime() - 1000 / FPS * 0.5;
-    webFrame();
+    startMainLoop(game, {updateFPS: FPS});
 };
 
 var resizeGame = function() {
