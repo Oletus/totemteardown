@@ -52,14 +52,14 @@ Game.prototype.reset = function() {
 
     this.inputMapper = new InputMapper(this, 4);
 
-    this.inputMapper.addListener(Gamepads.BUTTONS.DOWN_OR_ANALOG_DOWN, ['down', 's'], this.moveCursorDown);
-    this.inputMapper.addListener(Gamepads.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.moveCursorUp);
-    this.inputMapper.addListener(Gamepads.BUTTONS.LEFT, ['left', 'a'], this.cursorLeft);
-    this.inputMapper.addListener(Gamepads.BUTTONS.RIGHT, ['right', 'd'], this.cursorRight);
-    this.inputMapper.addListener(Gamepads.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
-    this.inputMapper.addListener(Gamepads.BUTTONS.X, ['p', '2'], this.activateBlock);
-    this.inputMapper.addListener(Gamepads.BUTTONS.START, ['enter'], this.start);
-    this.inputMapper.addListener(Gamepads.BUTTONS.Y, ['y'], this.showInstructions, this.hideInstructions);
+    this.inputMapper.addListener(Gamepad.BUTTONS.DOWN_OR_ANALOG_DOWN, ['down', 's'], this.moveCursorDown);
+    this.inputMapper.addListener(Gamepad.BUTTONS.UP_OR_ANALOG_UP, ['up', 'w'], this.moveCursorUp);
+    this.inputMapper.addListener(Gamepad.BUTTONS.LEFT, ['left', 'a'], this.cursorLeft);
+    this.inputMapper.addListener(Gamepad.BUTTONS.RIGHT, ['right', 'd'], this.cursorRight);
+    this.inputMapper.addListener(Gamepad.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
+    this.inputMapper.addListener(Gamepad.BUTTONS.X, ['p', '2'], this.activateBlock);
+    this.inputMapper.addListener(Gamepad.BUTTONS.START, ['enter'], this.start);
+    this.inputMapper.addListener(Gamepad.BUTTONS.Y, ['y'], this.showInstructions, this.hideInstructions);
 
     if(SOUND_ON) {
         Game.longIntroSound.play();
