@@ -385,8 +385,8 @@ Game.prototype.hasBlock = function(pole, block) {
 };
 
 Game.prototype.selectBlock = function(playerNumber) {
+    this.fasterCountdown[playerNumber] += 1;
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.fasterCountdown[playerNumber] += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -394,8 +394,10 @@ Game.prototype.selectBlock = function(playerNumber) {
 };
 
 Game.prototype.deselectBlock = function(playerNumber) {
-    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+    if (this.fasterCountdown[playerNumber] > 0) {
         this.fasterCountdown[playerNumber] -= 1;
+    }
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -421,6 +423,7 @@ Game.prototype.activeProjectiles = function(playerNumber) {
 };
 
 Game.prototype.activateBlock = function(playerNumber) {
+    this.fasterCountdown[playerNumber] += 1;
     if (this.state === Game.VICTORY) {
         if (this.stateTime > MIN_VICTORY_TIME) {
             this.reset();
@@ -428,7 +431,6 @@ Game.prototype.activateBlock = function(playerNumber) {
         return;
     }
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.fasterCountdown[playerNumber] += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -451,9 +453,8 @@ Game.prototype.activateBlock = function(playerNumber) {
 };
 
 Game.prototype.depressActivateBlock = function(playerNumber) {
-    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+    if (this.fasterCountdown[playerNumber] > 0) {
         this.fasterCountdown[playerNumber] -= 1;
-        return;
     }
 };
 
