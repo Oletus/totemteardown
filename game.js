@@ -46,8 +46,10 @@ Game.prototype.reset = function() {
     }
 
     this.cursors = [];
+    this.fasterCountdown = [];
     for (var i = 0; i < POLE_COUNT; ++i) {
         this.cursors.push(new Cursor({block: this.totemPoles[i].blocks.length - 1, pole: i}));
+        this.fasterCountdown.push(0);
     }
 
     this.inputMapper = new InputMapper(this, 4);
@@ -57,7 +59,7 @@ Game.prototype.reset = function() {
     this.inputMapper.addListener(Gamepad.BUTTONS.LEFT, ['left', 'a'], this.cursorLeft);
     this.inputMapper.addListener(Gamepad.BUTTONS.RIGHT, ['right', 'd'], this.cursorRight);
     this.inputMapper.addListener(Gamepad.BUTTONS.A, ['o', '1'], this.selectBlock, this.deselectBlock);
-    this.inputMapper.addListener(Gamepad.BUTTONS.X, ['p', '2'], this.activateBlock);
+    this.inputMapper.addListener(Gamepad.BUTTONS.X, ['p', '2'], this.activateBlock, this.depressActivateBlock);
     this.inputMapper.addListener(Gamepad.BUTTONS.START, ['enter'], this.start);
     this.inputMapper.addListener(Gamepad.BUTTONS.Y, ['y'], this.showInstructions, this.hideInstructions);
 
@@ -384,7 +386,7 @@ Game.prototype.hasBlock = function(pole, block) {
 
 Game.prototype.selectBlock = function(playerNumber) {
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.stateTime += 1;
+        this.fasterCountdown[playerNumber] += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -392,6 +394,10 @@ Game.prototype.selectBlock = function(playerNumber) {
 };
 
 Game.prototype.deselectBlock = function(playerNumber) {
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.fasterCountdown[playerNumber] -= 1;
+        return;
+    }
     var cursor = this.cursorActive(playerNumber);
     if (HOLD_TO_SWAP) {
         cursor.selected = false;
@@ -422,7 +428,7 @@ Game.prototype.activateBlock = function(playerNumber) {
         return;
     }
     if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
-        this.stateTime += 1;
+        this.fasterCountdown[playerNumber] += 1;
         return;
     }
     var cursor = this.cursorActive(playerNumber);
@@ -441,6 +447,13 @@ Game.prototype.activateBlock = function(playerNumber) {
             var addedObjs = pole.blocks[cursor.block].activate(playerNumber);
             this.dynamicObjs.push.apply(this.dynamicObjs, addedObjs);
         }
+    }
+};
+
+Game.prototype.depressActivateBlock = function(playerNumber) {
+    if (this.state == Game.START_COUNTDOWN || this.state == Game.PRE_COUNTDOWN) {
+        this.fasterCountdown[playerNumber] -= 1;
+        return;
     }
 };
 
@@ -528,10 +541,21 @@ Game.prototype.update = function(deltaTime) {
     var i;
     this.inputMapper.update();
 
+    if (this.state === Game.PRE_COUNTDOWN || this.state === Game.START_COUNTDOWN) {
+        var fasterCountdownVotes = 0;
+        for (i = 0; i < this.fasterCountdown.length; ++i) {
+            if (this.fasterCountdown[i] > 0) {
+                ++fasterCountdownVotes;
+            }
+        }
+        if (fasterCountdownVotes > 0) {
+            this.stateTime += (3 * fasterCountdownVotes / this.totemPoles.length) / FPS;
+        }
+    }
+
     this.stateTime += 1/FPS;
 
     if (this.state === Game.PRE_COUNTDOWN) {
-
         if (this.stateTime > PRE_COUNTDOWN_DURATION) {
             this.state = Game.START_COUNTDOWN;
             this.stateTime = 0;
