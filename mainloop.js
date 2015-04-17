@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Start a main loop on the provided game with the provided options.
  * @param {Array.<Object>} updateables Objects with two functions: update() and render().
@@ -7,7 +9,7 @@
  *   CanvasRenderingContext2D that the following updateables in the array will use.
  *   Updateables that are processed after the first one receive this rendering context
  *   as a parameter.
- * @param {Object} options Takes the following keys:
+ * @param {Object} options Takes the following keys (all optional):
  *
  * updateFPS: number
  *  The rate at which the game state receives update() calls.
@@ -16,16 +18,23 @@
  *  Every update is not necessarily displayed on the screen.
  *
  * debugMode: boolean
- *  When debugMode is on, a timeline of frames is drawn on the canvas returned
+ *  When debug mode is on, a timeline of frames is drawn on the canvas returned
  *  from updateables[i].render().
  *  - Green in the log is an update which was rendered to the screen.
  *  - Orange in the log is an update which was not rendered to the screen.
  *  - White in the log is a frame on which the game state was not updated.
+ *  If Mousetrap is imported, you may also hold T to speed up the game
+ *  execution while in debug mode.
+ *
+ * onRefocus: function
+ *  Function that should be called when the window becomes visible after it
+ *  has been invisible for a while.
  */
 var startMainLoop = function(updateables, options) {
     var defaults = {
         updateFPS: 60,
-        debugMode: false
+        debugMode: false,
+        onRefocus: null
     };
 
     if (options === undefined) {
@@ -39,10 +48,18 @@ var startMainLoop = function(updateables, options) {
     if (!(updateables instanceof Array)) {
         updateables = [updateables];
     }
-    
+
+    var now = function() {
+        if ('performance' in window && 'now' in performance) {
+            return performance.now();
+        } else {
+            return Date.now();
+        }
+    };
+
     var timePerUpdate = 1000 / options.updateFPS;
 
-    var nextFrameTime = new Date().getTime() - timePerUpdate * 0.5;
+    var nextFrameTime = -1;
 
     var frameLog = [];
 
@@ -84,13 +101,43 @@ var startMainLoop = function(updateables, options) {
         }
         ctx.restore();
     };
+    
+    var visible = true;
+    var visibilityChange = function() {
+        visible = document.visibilityState == document.PAGE_VISIBLE || (document.hidden === false);
+        nextFrameTime = -1;
+        if (visible && options.onRefocus != null) {
+            options.onRefocus();
+        }
+    };
+    
+    document.addEventListener('visibilitychange', visibilityChange);
+
+    var fastForward = false;
+    if (options.debugMode && 'Mousetrap' in window && 'bindGlobal' in Mousetrap) {
+        var speedUp = function() {
+            fastForward = true;
+        };
+        var slowDown = function() {
+            fastForward = false;
+        };
+        Mousetrap.bindGlobal('f', speedUp, 'keydown');
+        Mousetrap.bindGlobal('f', slowDown, 'keyup');
+    }
 
     var frame = function() {
         // Process a single requestAnimationFrame callback
-        var time = new Date().getTime();
+        if (!visible) {
+            requestAnimationFrame(frame);
+            return;
+        }
+        var time = now();
         var callbackTime = time;
         var updated = false;
         var updates = 0;
+        if (nextFrameTime < 0) {
+            nextFrameTime = time - timePerUpdate * 0.5;
+        }
         // If there's been a long time since the last callback, it can be a sign that the game
         // is running very badly but it is possible that the game has gone out of focus entirely.
         // In either case, it is reasonable to do a maximum of half a second's worth of updates
@@ -99,7 +146,11 @@ var startMainLoop = function(updateables, options) {
             nextFrameTime = time - 500;
         }
         while (time > nextFrameTime) {
-            nextFrameTime += timePerUpdate;
+            if (fastForward) {
+                nextFrameTime += timePerUpdate / 5;
+            } else {
+                nextFrameTime += timePerUpdate;
+            }
             for (var i = 0; i < updateables.length; ++i) {
                 updateables[i].update(timePerUpdate * 0.001);
             }
